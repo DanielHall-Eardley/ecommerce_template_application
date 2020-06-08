@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "@easypost/api": "^3.8.1",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.9.18",
+    "stripe": "^8.60.0"
   }
 }

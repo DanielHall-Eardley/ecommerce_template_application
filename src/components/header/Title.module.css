@@ -1,0 +1,15 @@
+.title {
+  margin-right: auto;
+  margin-left: var(--spacing-md);
+  font-size: var(--font-lg);
+  color: var(--pink);
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (max-width: 600px) {
+  .title {
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+}

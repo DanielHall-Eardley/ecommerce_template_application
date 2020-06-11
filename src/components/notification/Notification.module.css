@@ -1,0 +1,17 @@
+.error {
+  width: 100%;
+  padding: var(--spacing-md);
+  text-align: center;
+  background-color: var(--red);
+  color: var(--grey);
+  font-size: var(--font-md);
+}
+
+.notification {
+  width: 100%;
+  padding: var(--spacing-md);
+  text-align: center;
+  background-color: var(--blue);
+  color: var(--grey);
+  font-size: var(--font-md);
+}

@@ -1,6 +1,8 @@
+import {apiHost} from '../global'
+
 export default async (url, body, headers, method) => {
   try {
-    const response = await fetch("http://localhost:8000/" + url, {
+    const response = await fetch(apiHost + url, {
       method: method,
       body: body,
       headers: headers

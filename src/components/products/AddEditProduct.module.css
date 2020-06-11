@@ -1,0 +1,59 @@
+.container {
+  padding: var(--spacing-md);
+}
+
+.header {
+  font-size: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.form {
+  border: var(--bdr-pink);
+  padding: var(--spacing-md);
+  border-radius: var(--bdr-rad);
+  margin: var(--spacing-md) 5vw;
+}
+
+.input {
+  display: block;
+  margin-bottom: var(--spacing-md);
+  width: 40rem;
+}
+
+.textarea {
+  width: 100%;
+  height: 12rem;
+  border: var(--bdr-light);
+  padding: var(--spacing-sm);
+  border-radius: var(--bdr-rad);
+  margin-bottom: var(--spacing-md);
+  outline: none
+}
+
+.spec {
+  display: flex;
+}
+
+.spec input {
+  flex: 1;
+  margin-right: var(--spacing-sm);
+}
+
+.save {
+  width: 100%;
+  margin-top: var(--spacing-sm);
+}
+
+.specificationList {
+  list-style: none;
+  margin-top: var(--spacing-sm);
+}
+
+.listItem {
+  font-size: var(--font-sm);
+  display: flex;
+}
+
+.listItem button {
+  margin-left: auto;
+}

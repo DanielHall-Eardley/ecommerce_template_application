@@ -1,0 +1,11 @@
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (max-width: 600px) {
+  .nav {
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+} 

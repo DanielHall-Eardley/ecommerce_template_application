@@ -1,0 +1,148 @@
+:root {
+  /*color*/
+  --pink: pink;
+  --grey: grey;
+  --red: red;
+  --blue: lightblue;
+  --white: white;
+  --light-grey: lightgrey;
+  --golden: #fc8803;
+
+  /*fonts*/
+  --font-sm: 1.7rem;
+  --font-md: 2.2rem;
+  --font-lg: 3rem;
+
+  /*spacing*/
+  --spacing-sm: 1.2rem;
+  --spacing-md: 2.2rem;
+  --spacing-lg: 3rem;
+
+  /*border*/
+  --bdr-light: solid 1px var(--light-grey);
+  --bdr-pink: solid 1.5px var(--pink);
+  --bdr-rad: 1rem
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.25%;
+}
+
+
+/*stripe styles*/
+.StripeElement {
+  height: 40px;
+  padding: 10px 12px;
+  width: 30rem;
+  color: #32325d;
+  background-color: white;
+  border: 1px solid transparent;
+  border-radius: 4px;
+
+  box-shadow: 0 1px 3px 0 #e6ebf1;
+  -webkit-transition: box-shadow 150ms ease;
+  transition: box-shadow 150ms ease;
+}
+
+.StripeElement--focus {
+  box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+  border-color: #fa755a;
+}
+
+.StripeElement--webkit-autofill {
+  background-color: #fefde5 !important;
+}
+
+a,
+a:visited,
+.default-link,
+.default-link:visited {
+  font-size: var(--font-sm);
+  text-decoration: none;
+  color: var(--grey);
+  transition: all .2s;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background-color: inherit;
+  margin-right: var(--spacing-md);
+}
+
+default-link:hover, a:hover {
+  color: var(--pink);
+}
+
+default-link:active, a:active{
+  color: red;
+}
+
+header {
+  height: 10vh;
+  border-bottom: var(--bdr-light);
+  display: flex;
+}
+
+input {
+  border-radius: var(--bdr-rad);
+  border: var(--bdr-light);
+  height: 3rem;
+  outline: none;
+  padding-left: var(--spacing-sm);
+}
+
+input:focus {
+  border: var(--bdr-pink);
+}
+
+.primary-btn, button {
+  padding: 0 var(--spacing-sm);
+  height: 3rem;
+  border: none;
+  border-radius: var(--bdr-rad);
+  outline: none;
+  background-color: var(--pink);
+  color: white;
+}
+
+@media screen and (max-width: 600px) {
+  header {
+    flex-direction: column;
+    justify-content: center;
+    height: auto
+  }
+}
+
+img {
+  object-fit: cover;
+  display:block;
+  height: 100%;
+  width: 100%;
+}
+
+p {
+  line-height: 150%;
+  word-break: break-all;
+  word-spacing: 3px;
+  white-space: pre-line;
+}
+
+.active {
+  color: var(--pink) !important;
+}
+
+label {
+  font-size: var(--spacing-sm);
+  margin-bottom: .7rem;
+  display: block;
+}
+
+

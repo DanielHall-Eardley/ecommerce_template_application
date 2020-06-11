@@ -1,0 +1,21 @@
+.login {
+  margin: 0 auto;
+  margin-top: var(--spacing-lg);
+  width: 40rem;
+  border: var(--bdr-pink);
+  border-radius: var(--bdr-rad);
+  padding: var(--spacing-sm);
+}
+
+.login input {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
+@media screen and (max-width: 600px) {
+  .login {
+    border: none;
+    width: 100%;
+  }
+}

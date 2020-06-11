@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+  padding: var(--spacing-sm);
+  border-bottom: var(--bdr-light);
+}
+
+.input {
+  flex: 1;
+  margin-right: var(--spacing-sm);
+}
+
+.add {
+  margin-left: var(--spacing-sm);
+}

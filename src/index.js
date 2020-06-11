@@ -3,16 +3,16 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import {Elements} from '@stripe/react-stripe-js'
-import {loadStripe} from '@stripe/stripe-js'
 
-const stripePromise = loadStripe('pk_test_Bo8TQrRb1VZuEd1bzgFJXSqC00ofaJvGQu')
+import {Provider} from 'react-redux'
+import store from './store'
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <Elements stripe={stripePromise}>
-      <App />
-    </Elements>
+    <Provider store={store}>
+      <App/>
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

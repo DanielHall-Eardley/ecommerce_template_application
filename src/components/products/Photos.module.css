@@ -1,0 +1,40 @@
+.container {
+  margin-bottom: var(--spacing-md);
+}
+
+.upload{
+  display: inline-block;
+  padding-top: .7rem;
+  margin-bottom: 0;
+}
+
+.photoPreview {
+  margin: var(--spacing-sm) 0;
+  display: grid;
+  grid-auto-rows: 20rem;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.photo {
+  position: relative;
+}
+
+.photo label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.6rem;
+  color: red;
+  opacity: 0;
+  transition: all .2s;
+}  
+    
+.photo img:hover{
+  filter: grayscale(100%) brightness(20%);
+}
+
+.photo img:hover + label {
+  opacity: 1;
+}

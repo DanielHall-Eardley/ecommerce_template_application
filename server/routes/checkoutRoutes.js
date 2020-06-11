@@ -1,6 +1,6 @@
 const router = require('express').Router()
-const checkoutController = require('../controller/checkoutController')
+const checkoutController = require('../controllers/checkoutController')
 
-router.post('/payment/create', checkoutController.paymentCreate)
+router.post('/create', checkoutController.paymentCreate)
 
 module.exports = router

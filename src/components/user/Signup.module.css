@@ -1,0 +1,25 @@
+.signup {
+  margin: 0 auto;
+  margin-top: var(--spacing-lg);
+  width: 40rem;
+  border: var(--bdr-pink);
+  border-radius: var(--bdr-rad);
+  padding: var(--spacing-sm);
+}
+
+.signup input {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    align-items: flex-start;
+  }
+
+  .signup {
+    border: none;
+    width: 100%;
+  }
+}

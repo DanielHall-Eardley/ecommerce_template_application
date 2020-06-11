@@ -1,0 +1,12 @@
+.heading {
+  font-size: var(--font-md);
+  margin-bottom: var(--spacing-sm);
+  background-color: var(--golden);
+  padding: var(--spacing-sm);
+  color: var(--white);
+}
+
+.text {
+  font-size: var(--font-sm);
+  margin: 0 8vw;
+}

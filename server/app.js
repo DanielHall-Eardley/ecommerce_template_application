@@ -1,12 +1,25 @@
 const express = require('express')
 const app = express()
+const path = require('path')
 
 const Easypost = require('@easypost/api')
 const api = new Easypost('EZTK9ac803df43c946479ebe8e43c56cf836v7SbRH70kJCmWRB57yl2qA')
-
 const mongoose = require('mongoose')
 const generateRates = require('./helper/generateRates')
-const stripe = require('../helper/stripe')
+const stripe = require('./helper/stripe')
+const env = require('dotenv')
+const fileUpload = require("express-fileupload")
+
+const adminRoutes = require('./routes/adminRoutes')
+const checkoutRoutes = require('./routes/checkoutRoutes')
+const userRoutes = require('./routes/userRoutes')
+const productRoutes = require('./routes/productRoutes')
+const result = env.config()
+if (result.error) {
+  throw result.error
+}
+
+app.use('/images', express.static(path.join(__dirname, 'images')))
 
 const webhookSecret = 'whsec_YFqJxLEijotEPDOgl0xPMD1ltUjuK0SJ'
 app.post('/webhook', express.raw({type: 'application/json'}), async (req, res,  next) => {
@@ -26,13 +39,31 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (req, res,  
   res.status(200).json({received: true})
 })
 
+
+
+app.use(fileUpload({
+  createParentPath: true
+}))
 app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 app.use((req, res, next) => {
   res.set("Access-Control-Allow-Origin", "*");
   res.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
   res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
+
+app.use('/admin', adminRoutes)
+app.use('/checkout', checkoutRoutes)
+app.use('/user', userRoutes)
+app.use('/product', productRoutes)
+
+app.use((error, req, res, next) => {
+  console.log(error)
+  const status = error.status || 500
+  const messages = error.messages || 'An Error occurred'
+  res.status(200).json({error: messages, status: status})
+})
 
 const fromAddress = {
   street1: '3226 Redpath Circle',

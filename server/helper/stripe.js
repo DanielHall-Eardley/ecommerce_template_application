@@ -1,2 +1,2 @@
-const stripe = require('stripe')('sk_test_vRAKDmwtvPagiIZ72EgE7SSU00P5PnnpiG')
+const stripe = require('stripe')(process.env.STRIPE_SERVER_API_KEY)
 module.exports = stripe

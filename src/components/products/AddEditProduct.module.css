@@ -40,8 +40,7 @@
 }
 
 .save {
-  width: 100%;
-  margin-top: var(--spacing-sm);
+  width: 30rem;
 }
 
 .specificationList {
@@ -56,4 +55,40 @@
 
 .listItem button {
   margin-left: auto;
+}
+
+.weight, .dimensions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.weight select {
+  flex: 1;
+  margin-left: var(--spacing-sm);
+}
+
+.weight div {
+  flex: 1;
+}
+
+.inputWeight {
+  width: 100%
+}
+
+.dimensions * {
+  flex: 1;
+}
+
+.dimensions div:not(:last-child) {
+  margin-right: var(--spacing-sm);
+}
+
+.dimensions div input {
+  width: 100%;
+}
+
+.flexContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }

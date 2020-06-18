@@ -5,13 +5,15 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router-dom'
 
 const List = props => {
-  const [currentProductList, setList] = useState(props.productList)
-  
+  const [currentProductList, setList] = useState([])
+  console.log(props)
   useEffect(() => {
-    if (props.filteredList.length > 0) {
+    if (props.searching) {
       setList(props.filteredList)
+    } else {
+      setList(props.productList)
     }
-  }, [props.filteredList])
+  }, [props.searching, props.productList, props.filteredList])
 
   const productList = (products) => {
     const productList = products.map(prd => {
@@ -28,7 +30,7 @@ const List = props => {
 
     return productList
   }
-
+  console.log(currentProductList)
   return (
     <section className={styles.container}>
       {productList(currentProductList)}
@@ -39,7 +41,8 @@ const List = props => {
 const mapStateToProps = state => {
   return {
     productList: state.product.productList,
-    filteredList: state.product.productList,
+    filteredList: state.product.filteredList,
+    searching: state.product.searching
   }
 }
 

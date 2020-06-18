@@ -36,7 +36,7 @@ exports.create = async (req, res, next) => {
     checkValidationErr(req)
    
     const photoUrlArray = []
-    if (req.files.photos && !Array.isArray(req.files.photos)) {
+    if (req.files && req.files.photos && !Array.isArray(req.files.photos)) {
       const uploadPhoto = req.files.photos
       uploadPhoto.mv('./images/' + uploadPhoto.name, error => {
         if (error) {
@@ -46,7 +46,7 @@ exports.create = async (req, res, next) => {
       photoUrlArray.push('/images/' + uploadPhoto.name)
     }
 
-    if (req.files.photos && Array.isArray(req.files.photos)) {
+    if (req.files && req.files.photos && Array.isArray(req.files.photos)) {
       const uploadPhotos = req.files.photos
       uploadPhotos.forEach(photo => {
         photo.mv('./images/' + photo.name, error => {
@@ -57,7 +57,7 @@ exports.create = async (req, res, next) => {
         photoUrlArray.push('/images/' + photo.name)
       })
     }
-
+   
     const product = new Product({
       name: req.body.name,
       price: req.body.price,
@@ -65,6 +65,12 @@ exports.create = async (req, res, next) => {
       description: req.body.description,
       photoArray: photoUrlArray,
       specifications: req.body.specificationArray,
+      weight: req.body.weight,
+      height: req.body.height,
+      length: req.body.length,
+      width: req.body.width,
+      weightUnit: req.body.weightUnit,
+      measurementUnit: req.body.measurementUnit,
     })
 
     if (!product) {

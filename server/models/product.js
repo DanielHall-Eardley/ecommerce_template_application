@@ -21,7 +21,23 @@ const ProductSchema = Schema({
   specifications: {
     type: Array,
     required: true
-  }
+  },
+  weight: {
+    type: Number,
+    required: true
+  },
+  length: {
+    type: Number,
+    required: true
+  },
+  height: {
+    type: Number,
+    required: true
+  },
+  width: {
+    type: Number,
+    required: true
+  },
 })
 
 exports.Product = model('Product', ProductSchema)

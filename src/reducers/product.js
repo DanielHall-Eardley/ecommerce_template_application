@@ -3,44 +3,31 @@ import {
   STORE_PRODUCT_LIST, 
   FILTER_PRODUCT_LIST, 
   CLEAR_PRODUCT_LIST,
-  ADD_PRODUCT
+  ADD_PRODUCT,
+  FINISH_SEARCH
 } from '../actions/product'
 
 const initialState = {
   productList: [],
   product: {},
-  filteredList: []
+  filteredList: [],
+  searching: false
 }
 
 const user = (state = initialState, action) => {
   switch (action.type) {
     case STORE_PRODUCT_LIST: 
-      const newProductList = []
-
-      for(let newProduct of action.list){
-        let addProduct = true
-
-        for(let oldProduct of state.productList) {
-          if (oldProduct._id === newProduct._id) {
-            addProduct = false
-          }
-        }
-
-        if (addProduct) {
-          newProductList.push(newProduct)
-        }
-      }
-      
       return {
         ...state,
-        productList: newProductList
+        productList: action.list
       }
     case FILTER_PRODUCT_LIST: 
       const filteredList = state.productList.filter(product => {
-        return product.name.toString().includes(action.query)
+        return product.name.toLowerCase().includes(action.query.toLowerCase())
       })
       return {
         ...state,
+        searching: true,
         filteredList: filteredList
       }
     case STORE_PRODUCT: 
@@ -54,6 +41,11 @@ const user = (state = initialState, action) => {
         productList: [...state.productList, action.product],
         filteredList: [...state.filteredList, action.product],
       }
+    case FINISH_SEARCH: 
+    return {
+      ...state,
+      searching: false
+    }
     case CLEAR_PRODUCT_LIST: 
       return initialState
     default: 

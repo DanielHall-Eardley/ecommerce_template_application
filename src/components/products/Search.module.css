@@ -1,7 +1,9 @@
 .container {
   display: flex;
-  padding: var(--spacing-sm);
+  align-items: center;
+  height: 8vh;
   border-bottom: var(--bdr-light);
+  padding: 0 var(--spacing-sm);
 }
 
 .input {
@@ -9,6 +11,6 @@
   margin-right: var(--spacing-sm);
 }
 
-.add {
+.btnMargin {
   margin-left: var(--spacing-sm);
 }

@@ -71,6 +71,10 @@ const AddEditProduct = props => {
     content: ''
   })
   const [specificationArray, setSpecification] = useState(oldSpecifications)
+  const [weight, setWeight] = useState(0)
+  const [width, setWidth] = useState(0)
+  const [height, setHeight] = useState(0)
+  const [length, setLength] = useState(0)
 
   const removeSpec = (name) => {
     const filteredArray = specificationArray.filter(spec => spec.name !== name)
@@ -108,7 +112,11 @@ const AddEditProduct = props => {
       description,
       price,
       specialPrice,
-      specificationArray
+      specificationArray,
+      width,
+      height,
+      length,
+      weight,
     })
 
     const photoFileArray = fileArray.filter(el => typeof el === "object")
@@ -122,11 +130,18 @@ const AddEditProduct = props => {
     const response = await api(url, formData, headers, 'POST')
   
     if (response.error) {
-      props.displayError(response.error)
+      return props.displayError(response.error)
     }
     
-    props.addProduct(response.product)
-    navigate.push('product/detail/' + response.product._id)
+    navigate.push('/product/detail/' + response.product._id)
+  }
+
+  const addSpecification = () => {
+    inputSpecification({
+      name: "",
+      content: ''
+    })
+    setSpecification([...specificationArray ,specification])
   }
   
   return (
@@ -190,15 +205,59 @@ const AddEditProduct = props => {
             }/>
           <button 
             type='button'
-            onClick={() => setSpecification([...specificationArray ,specification])}>
+            onClick={addSpecification}>
             Add Specification
           </button>
         </div>
         <ul className={styles.specificationList}>
           {specificationList}
         </ul>
-        <Link to='/product'>Back</Link>
-        <button className={styles.save}>Save Product</button>
+        { path === 'create' ? (
+          <div>
+            <div className={styles.dimensions}>
+              <div>
+                <label>Enter Product Weight in ounces</label>
+                <input 
+                  className={styles.input}
+                  step='any'
+                  type="number" 
+                  value={weight} 
+                  onChange={event => setWeight(event.target.value)} />
+              </div>
+              <div>
+                <label>Enter Product Length in inches</label>
+                <input 
+                  className={styles.input}
+                  step='any'
+                  type="number" 
+                  value={length} 
+                  onChange={event => setLength(event.target.value)} />
+              </div>
+              <div>
+                <label>Enter Product Width in inches</label>
+                <input 
+                  className={styles.input}
+                  step='any'
+                  type="number" 
+                  value={width}
+                  onChange={event => setWidth(event.target.value)} />
+              </div>
+              <div>
+                <label>Enter Product Height in inches</label>
+                <input 
+                  className={styles.input}
+                  step='any'
+                  type="number" 
+                  value={height} 
+                  onChange={event => setHeight(event.target.value)} />
+              </div>
+            </div>
+          </div>
+        ) : null}  
+        <div className={styles.flexContainer}>
+          <Link to='/product'>Back</Link>
+          <button className={styles.save}>Save Product</button>
+        </div>
       </form>
     </section>
   )

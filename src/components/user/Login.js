@@ -14,7 +14,8 @@ import {
   storeUser,
   clearUser
 } from '../../actions/user'
-import Notification from '../notification/Notification'
+import {storeOrderSummary} from '../../actions/order'
+import {apiHost} from '../../global'
 
 const Login = (props) => {
   const history = useHistory()
@@ -37,25 +38,41 @@ const Login = (props) => {
       email
     })
 
-    const response = await api('/user/login', body, headers, 'POST')
+    const loginResponse = await api('/user/login', body, headers, 'POST')
 
-    if (response.error) {
-      return props.displayError(response.error)
+    if (loginResponse.error) {
+      return props.displayError(loginResponse.error)
+    }
+    
+    displayNotification('Logged In!')
+    localStorage.setItem('token', loginResponse.user.token)
+    localStorage.setItem('userId', loginResponse.user.userId)
+    localStorage.setItem('name', loginResponse.user.name)
+    localStorage.setItem('type', loginResponse.user.type)
+    localStorage.setItem('tokenExpiration', loginResponse.user.tokenExpiration)
+
+    props.storeUser(loginResponse.user)
+
+    const res = await fetch(apiHost + '/order/summary/' + loginResponse.user.userId, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': loginResponse.user.token
+      }
+    }, [])
+
+    const orderResponse = await res.json()
+
+    if (orderResponse.error) {
+      return
     }
 
-    displayNotification('Logged In!')
-    localStorage.setItem('token', response.user.token)
-    localStorage.setItem('userId', response.user.userId)
-    localStorage.setItem('name', response.user.name)
-    localStorage.setItem('type', response.user.type)
-
-    props.storeUser(response.user)
+    props.storeOrderSummary(orderResponse)
+    
     history.push('/')
   }
 
   return (
     <section>
-      <Notification error={props.error} notification={props.notification}/>
       <form onSubmit={login} className={styles.login}>
         <input 
           type="email" 
@@ -75,8 +92,6 @@ const Login = (props) => {
 
 const mapStateToProps = state => {
   return {
-    error: state.notification.error,
-    notification: state.notification.notification,
     token: state.user.token
   }
 }
@@ -88,6 +103,7 @@ const mapDispatchToProps = dispatch => {
     displayNotification: notification => dispatch(displayNotification(notification)),
     clearNotification: () => dispatch(clearNotification()),
     storeUser: user => dispatch(storeUser(user)),
+    storeOrderSummary: order => dispatch(storeOrderSummary(order)),
     clearUser: () => dispatch(clearUser()),
   }
 }

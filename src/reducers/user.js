@@ -7,7 +7,8 @@ const initialState = {
   name: '',
   userId: null,
   token: null,
-  type: ''
+  type: '',
+  tokenExpiration: null
 }
 
 const user = (state = initialState, action) => {
@@ -18,6 +19,7 @@ const user = (state = initialState, action) => {
         userId: action.user.userId,
         token: action.user.token,
         type: action.user.type,
+        tokenExpiration: action.user.tokenExpiration
       }
     case CLEAR_USER: 
       return initialState

@@ -2,26 +2,27 @@ const express = require('express')
 const app = express()
 const path = require('path')
 
-const Easypost = require('@easypost/api')
-const api = new Easypost('EZTK9ac803df43c946479ebe8e43c56cf836v7SbRH70kJCmWRB57yl2qA')
-const mongoose = require('mongoose')
-const generateRates = require('./helper/generateRates')
-const stripe = require('./helper/stripe')
 const env = require('dotenv')
+const result = env.config({path: __dirname + '/.env'})
+if (result.error) {
+  throw result.error
+}
+
+const mongoose = require('mongoose')
+const stripe = require('./helper/stripe')
 const fileUpload = require("express-fileupload")
 
 const adminRoutes = require('./routes/adminRoutes')
 const checkoutRoutes = require('./routes/checkoutRoutes')
 const userRoutes = require('./routes/userRoutes')
 const productRoutes = require('./routes/productRoutes')
-const result = env.config()
-if (result.error) {
-  throw result.error
-}
+const orderRoutes = require('./routes/orderRoutes')
+
+const Order = require('./models/order')
 
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
-const webhookSecret = 'whsec_YFqJxLEijotEPDOgl0xPMD1ltUjuK0SJ'
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 app.post('/webhook', express.raw({type: 'application/json'}), async (req, res,  next) => {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -34,12 +35,10 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (req, res,  
   }
 
   console.log('confirmed payment', event)
-  //buy postage and print label
-
+  const order = await Order.findOne({paymentId: event.id})
+  //print shipping labels for relevant orders
   res.status(200).json({received: true})
 })
-
-
 
 app.use(fileUpload({
   createParentPath: true
@@ -57,6 +56,12 @@ app.use('/admin', adminRoutes)
 app.use('/checkout', checkoutRoutes)
 app.use('/user', userRoutes)
 app.use('/product', productRoutes)
+app.use('/order', orderRoutes)
+
+app.use(express.static('../build'))
+app.get('/*', function (req, res) {
+  res.sendFile(path.resolve('../build/index.html'));
+})  
 
 app.use((error, req, res, next) => {
   console.log(error)
@@ -65,31 +70,13 @@ app.use((error, req, res, next) => {
   res.status(200).json({error: messages, status: status})
 })
 
-const fromAddress = {
-  street1: '3226 Redpath Circle',
-  city: 'Mississauga',
-  state: 'Ontario',
-  country: 'CA',
-  zip: 'L5N8R2'
-}
-
-const toAddress = {
-  street1: '65 High Park Avenue',
-  street2: 'apt 401',
-  city: 'Etobicoke',
-  state: 'Ontario',
-  country: 'CA',
-  zip: 'M6P2R7'
-}
-
-const parcel = {
-  predefined_package: 'FlatRateEnvelope',
-  weight: 10,
-}
-
-const getRates = generateRates(fromAddress, toAddress, parcel, api)
-
-mongoose.connect('mongodb://localhost:27017/ecommerce')
+mongoose.connect(process.env.DATABASE_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
 .then(result => {
-  app.listen(8000)
+  app.listen(process.env.PORT)
+})
+.catch(error => {
+  console.log(error)
 })

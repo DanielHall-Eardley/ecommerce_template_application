@@ -7,7 +7,7 @@ exports.signup = async (req, res, next) => {
   try {
     const checkUserType = User.findById(req.body.userId)
     if (
-			process.env.FIRST_LOGIN === 'true' && 
+			process.env.FIRST_LOGIN === 'false' && 
 			checkUserType.type !== 'admin'
 		) {
       errorHandler(401, ['You are not authorized to create an admin account'])

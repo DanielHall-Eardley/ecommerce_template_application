@@ -4,6 +4,7 @@ export const CLEAR_PRODUCT_LIST = 'CLEAR_PRODUCT_LIST'
 export const STORE_PRODUCT = 'STORE_PRODUCT'
 export const ADD_PRODUCT = 'ADD_PRODUCT'
 export const UPDATE_PRODUCT = 'UPDATE_PRODUCT'
+export const FINISH_SEARCH = 'FINISH_SEARCH'
 
 export const storeProductList = (list) => {
   return {
@@ -30,6 +31,12 @@ export const addProduct = (product) => {
   return {
     type: ADD_PRODUCT,
     product
+  }
+}
+
+export const finishSearch = () => {
+  return {
+    type: FINISH_SEARCH,
   }
 }
 

@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import styles from './Search.module.css'
 import '../../Global.css'
 import {connect} from 'react-redux'
-import {filterProductList} from '../../actions/product'
+import {filterProductList, finishSearch} from '../../actions/product'
 import {
   displayError, 
   clearError,
@@ -31,11 +31,14 @@ const Search = props => {
         <button onClick={searchProducts}>
           Search Products
         </button>
+        <button onClick={props.finishSearch} className={styles.btnMargin}>
+          All Products
+        </button>
         {
           props.userType === 'admin' ?
           <button 
             onClick={() => navToProductAdd(navigation)}
-            className={styles.add}>
+            className={styles.btnMargin}>
             Add New Product
           </button> :
           null
@@ -55,6 +58,7 @@ const mapDispatchToProps = dispatch => {
     filterProductList: (query) => dispatch(filterProductList(query)),
     displayError: (error) => dispatch(displayError(error)),
     clearError: () => dispatch(clearError()),
+    finishSearch: () => dispatch(finishSearch()),
   }
 }
 

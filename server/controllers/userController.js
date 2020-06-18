@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const {User} = require('../models/user')
 const checkValidationErr = require('../helper/checkValidationErr')
+const {add, format} = require('date-fns')
 
 exports.signup = async (req, res, next) => {
   try {
@@ -59,14 +60,16 @@ exports.login = async (req, res, next) => {
 
 		const token = jwt.sign({
 			name: findUser.name,
-		}, process.env.JWT_SECRET, {expiresIn: "4h"})
-
+		}, process.env.JWT_SECRET, {expiresIn: "24h"})
+		const expiration = format(add(new Date(), {days: 1}), "T")
+	
 		res.status(200).json({ 
 			user: {
 				token: token, 
 				userId: findUser._id.toString(),
 				name: findUser.name,
 				type: findUser.type,
+				tokenExpiration: expiration
 			},
 		});
 

@@ -5,7 +5,7 @@ const isAuth = async (req, res, next) => {
   try {
     const token = req.get("Authorization")
     const verified = jwt.verify(token, process.env.JWT_SECRET)
-    
+    console.log(verified)
     if (!verified) {
       errorHandler(401, ["Please login to continue"])
     }

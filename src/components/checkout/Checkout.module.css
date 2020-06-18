@@ -1,0 +1,142 @@
+.checkout {
+  margin: var(--spacing-md) 10vw;
+  border: var(--bdr-pink);
+}
+
+.header {
+  padding: var(--spacing-sm);
+  background-color: var(--pink);
+  color: var(--white);
+  font-size: var(--font-md);
+  display: flex;
+  justify-content: space-between;
+}
+
+.products {
+  padding: var(--spacing-md);
+}
+
+.productItem, .summary {
+  padding: var(--spacing-sm);
+  border: var(--bdr-light);
+  border-radius: var(--bdr-rad);
+  font-size: var(--font-sm);
+  display: flex;
+  align-items: center;
+}
+
+.productItem span {
+  margin-right: var(--spacing-lg);
+}
+
+.price {
+  margin-left: auto;
+}
+
+.remove {
+  background-color: transparent;
+  color: var(--light-grey);
+}
+
+.productItem:not(:last-child) {
+  margin-bottom: var(--spacing-sm);
+}
+
+.address {
+  padding: var(--spacing-md);
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+}
+
+.address div input {
+  width: 100%;
+}
+
+.address button {
+  width: 14rem;
+}
+
+.selectPostage, .addressConfirmed {
+  padding: var(--spacing-md);
+  font-size: var(--font-sm);
+}
+
+.selectPostage label {
+  font-size: var(--font-sm);
+  font-weight: bold;
+}
+
+.shipment {
+  margin-bottom: var(--spacing-sm);
+  border: var(--bdr-pink);
+}
+
+.shipment h4 {
+  padding: .5rem;
+  background-color: var(--pink);
+  color: var(--white);
+}
+
+.rateList {
+  list-style: none;
+  padding: var(--spacing-sm);
+}
+
+.rateList li {
+  padding: 1rem;
+  border: var(--bdr-light);
+  border-radius: var(--bdr-rad);
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.rateList li:not(:last-child) {
+  margin-bottom: var(--spacing-sm);
+}
+
+.fee {
+  margin-right: var(--spacing-lg);
+}
+
+.selected {
+  background-color: var(--light-grey);
+}
+
+.confirmPostage {
+  display: flex;
+  align-items: center;
+}
+
+.confirmPostage > *:not(:last-child) {
+  margin-right: var(--spacing-md);
+}
+
+.summary {
+  margin: var(--spacing-md);
+  display: flex;
+  justify-content: flex-end;
+  font-size: var(--font-sm);
+}
+
+.summary span {
+  margin-left: var(--spacing-lg);
+}
+
+.payment {
+  padding: var(--spacing-md);
+}
+
+.payment button {
+  margin-top: var(--spacing-sm);
+}
+
+.fallBack {
+  width: 100%;
+  padding: var(--spacing-md);
+  text-align: center;
+  background-color: var(--blue);
+  color: var(--grey);
+  font-size: var(--font-md);
+}

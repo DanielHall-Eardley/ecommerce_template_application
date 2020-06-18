@@ -15,33 +15,33 @@ import {
   useRouteMatch
 } from 'react-router-dom'
 
-import Notification from '../notification/Notification'
 import Search from './Search'
 import AddEditProduct from './AddEditProduct'
 import List from './List'
+import ProductDetail from './ProductDetail'
 
 const ProductList = props => {
   useEffect(() => {
     props.clearError()
 
-    fetch(apiHost + '/product/list')
-      .then(res => {
-        return res.json()
-      })
-      .then(response => {
-        if (response.error) {
-          props.displayError(response.error)
-        }
+    const getProductList = async () => {
+      const res = await fetch(apiHost + '/product/list')
+      const response = await res.json()
 
-        props.storeProductList(response)
-      })
+      if (response.error) {
+        return props.displayError(response.error)
+      }
+      
+      props.storeProductList(response)
+    }
+    
+    getProductList()
   }, [])
  
   const {path} = useRouteMatch();
 
   return (
     <main className={styles.container}>
-      <Notification error={props.error} notification={props.notification}/>
       <Search/>
       <Switch>
         <Route exact path={path}>
@@ -53,16 +53,12 @@ const ProductList = props => {
         <Route path={`${path}/update/:id`}>
           <AddEditProduct />
         </Route>
+        <Route path={`${path}/detail/:id`}>
+          <ProductDetail />
+        </Route>
       </Switch>
     </main>
   )
-}
-
-const mapStateToProps = state => {
-  return {
-    error: state.notification.error,
-    notification: state.notification.notification,
-  }
 }
 
 const mapDispatchToProps = dispatch => {
@@ -74,6 +70,6 @@ const mapDispatchToProps = dispatch => {
 }
 
 export default connect(
-  mapStateToProps,
+  null,
   mapDispatchToProps
 )(ProductList)

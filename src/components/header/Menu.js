@@ -13,29 +13,30 @@ const Menu = props => {
     return (
       <nav className={styles.nav}>
         <NavLink to='/product'>Products</NavLink>
-        <NavLink to='orders/:userId'>Orders</NavLink>
+        <NavLink to='/order'>Orders</NavLink>
         <NavLink to='/signup?type=admin'>Add New Admin User</NavLink>
         <span className='default-link' onClick={props.clearUser}>Logout</span>
-        <NavLink to='/'>Home</NavLink> 
+        <NavLink exact={true} to='/'>Home</NavLink> 
       </nav>
     )
   } else if (userId) {
     return (
       <nav className={styles.nav}>
         <NavLink to='/product'>Products</NavLink>
-        <NavLink to='orders/:userId'>Orders</NavLink>
+        <NavLink to='/order'>Orders</NavLink>
         <NavLink to='/checkout'>Checkout</NavLink>
+        <NavLink exact={true} to='/'>Home</NavLink> 
         <span className='default-link' onClick={props.clearUser}>Logout</span>
-        <NavLink to='/'>Home</NavLink> 
+        <span className='default-link'>Cart: {props.orderSummary.count}</span>
       </nav>
     )
   } else {
     return (
       <nav className={styles.nav}>
         <NavLink to='/product'>Products</NavLink>
+        <NavLink exact={true} to='/'>Home</NavLink> 
         <NavLink to='/login'>Login</NavLink>
         <NavLink to='/signup'>Signup</NavLink>
-        <NavLink to='/'>Home</NavLink> 
       </nav>
     )
   }
@@ -43,7 +44,8 @@ const Menu = props => {
 
 const mapStateToProps = state => {
   return {
-    user: state.user
+    user: state.user,
+    orderSummary: state.order.summary
   }
 }
 

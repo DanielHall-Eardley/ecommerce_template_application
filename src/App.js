@@ -6,6 +6,7 @@ import {
   Route,
   useHistory
 } from "react-router-dom";
+import {apiHost} from './global'
 
 import Checkout from './components/checkout/Checkout.js'
 import Menu from './components/header/Menu.js'
@@ -14,33 +15,51 @@ import Landing from './components/landing/Landing.js'
 import Signup from './components/user/Signup.js'
 import Login from './components/user/Login.js'
 import ProductList from './components/products/ProductList.js'
+import OrderList from './components/orders/OrderList.js'
+import Notification from './components/notification/Notification'
 
 import {connect} from 'react-redux'
-import {storeUser} from './actions/user'
-import {
-  displayError, 
-  clearError,
-} from './actions/notification'
+import {storeUser, clearUser} from './actions/user'
+import {storeOrderSummary} from './actions/order'
+import {displayError, clearError} from './actions/notification'
+import { Elements } from '@stripe/react-stripe-js';
+import {loadStripe} from '@stripe/stripe-js'
+import checkLogin from './helper/checkLogin'
+const stripePromise = loadStripe('pk_test_Bo8TQrRb1VZuEd1bzgFJXSqC00ofaJvGQu')
 
 const App = props => {
   const navigate = useHistory()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
     props.clearError()
-
-    if (!token) {
-      props.displayError('Please login')
-    } else {
-      const user = {
-        token,
-        userId: localStorage.getItem('userId'),
-        name: localStorage.getItem('name'),
-        type: localStorage.getItem('type')
-      }
-      
-      props.storeUser(user)
+    
+    const result = checkLogin()
+ 
+    if (result.error) {
+      props.clearUser()
+      return props.displayError(result.error)
     }
+    
+    props.storeUser(result.user)
+  
+    const getOrderSummary = async (userId, token) => {
+      const res = await fetch(apiHost + '/order/summary/' + userId, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        }
+      }, [])
+
+      const response = await res.json()
+
+      if (response.error) {
+        return
+      }
+
+      props.storeOrderSummary(response)
+    }
+
+    getOrderSummary(result.user.userId, result.user.token)
   }, [])
 
   return (
@@ -49,12 +68,18 @@ const App = props => {
         <Title title='Custom PC'/>
         <Menu/>
       </header>
+      <Notification error={props.error} notification={props.notification}/> 
       <Switch>
+        <Route path='/order'>
+          <OrderList/>
+        </Route>
         <Route path='/product'>
           <ProductList/>
         </Route>
         <Route path='/checkout'>
-          <Checkout/>
+          <Elements stripe={stripePromise}>
+            <Checkout/>
+          </Elements>
         </Route>
         <Route path='/signup'>
           <Signup/>
@@ -62,7 +87,7 @@ const App = props => {
         <Route path='/login'>
           <Login/>
         </Route>
-        <Route exact path='/'>
+        <Route exact={true} path='/'>
           <Landing/>
         </Route>
       </Switch>
@@ -71,16 +96,26 @@ const App = props => {
   );
 }
 
+const mapStateToProps = state => {
+  return {
+    error: state.notification.error,
+    notification: state.notification.notification,
+  }
+}
+
+
 const mapDispatchToProps = dispatch => {
   return {
     storeUser: user => dispatch(storeUser(user)),
+    clearUser: () => dispatch(clearUser()),
     displayError: error => dispatch(displayError(error)),
     clearError: () => dispatch(clearError()),
+    storeOrderSummary: (summary) => dispatch(storeOrderSummary(summary)),
   }
 }
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(App)
 

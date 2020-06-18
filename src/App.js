@@ -25,7 +25,8 @@ import {displayError, clearError} from './actions/notification'
 import { Elements } from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js'
 import checkLogin from './helper/checkLogin'
-const stripePromise = loadStripe('pk_test_Bo8TQrRb1VZuEd1bzgFJXSqC00ofaJvGQu')
+import {stripeApiKey} from './global'
+const stripePromise = loadStripe(stripeApiKey)
 
 const App = props => {
   const navigate = useHistory()

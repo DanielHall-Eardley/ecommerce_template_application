@@ -3,10 +3,17 @@ const app = express()
 const path = require('path')
 
 const env = require('dotenv')
-const result = env.config({path: __dirname + '/.env'})
-if (result.error) {
-  throw result.error
+
+if (
+  process.env.NODE_ENV === 'development' || 
+  !process.env.NODE_ENV 
+) {
+  const result = env.config({path: __dirname + '/.env'})
+  if (result.error) {
+    throw result.error
+  }
 }
+
 
 const mongoose = require('mongoose')
 const stripe = require('./helper/stripe')
@@ -70,7 +77,13 @@ app.use((error, req, res, next) => {
   res.status(200).json({error: messages, status: status})
 })
 
-mongoose.connect(process.env.DATABASE_URL, {
+let databaseConnect = process.env.DATABASE_URI
+
+if (process.env.NODE_ENV !== 'production' || !process.env.DATABASE_URI) {
+  databaseConnect = process.env.DATABASE_URL
+}
+
+mongoose.connect(databaseConnect, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })

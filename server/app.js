@@ -74,7 +74,7 @@ app.use((error, req, res, next) => {
   res.status(200).json({error: messages, status: status})
 })
 
-let databaseConnect = process.env.DATABASE_URI
+let databaseConnect = process.env.MONGODB_URI
 
 if (process.env.NODE_ENV === 'development') {
   databaseConnect = process.env.DATABASE_URL

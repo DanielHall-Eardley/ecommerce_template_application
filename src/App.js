@@ -37,8 +37,7 @@ const App = props => {
     const result = checkLogin()
  
     if (result.error) {
-      props.clearUser()
-      return props.displayError(result.error)
+      return props.clearUser()
     }
     
     props.storeUser(result.user)

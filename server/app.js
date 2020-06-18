@@ -4,10 +4,7 @@ const path = require('path')
 
 const env = require('dotenv')
 
-if (
-  process.env.NODE_ENV === 'development' || 
-  !process.env.NODE_ENV 
-) {
+if (process.env.USERNAME === 'daniel') {
   const result = env.config({path: __dirname + '/.env'})
   if (result.error) {
     throw result.error
@@ -79,10 +76,10 @@ app.use((error, req, res, next) => {
 
 let databaseConnect = process.env.DATABASE_URI
 
-if (process.env.NODE_ENV !== 'production' || !process.env.DATABASE_URI) {
+if (process.env.NODE_ENV === 'development') {
   databaseConnect = process.env.DATABASE_URL
 }
-
+console.log(databaseConnect)
 mongoose.connect(databaseConnect, {
   useNewUrlParser: true,
   useUnifiedTopology: true

@@ -75,7 +75,13 @@ mongoose.connect(process.env.DATABASE_URL, {
   useUnifiedTopology: true
 })
 .then(result => {
-  app.listen(process.env.PORT)
+  let port = process.env.PORT
+
+  if (port === null || port === undefined) {
+    port = 8000
+  }
+
+  app.listen(port)
 })
 .catch(error => {
   console.log(error)

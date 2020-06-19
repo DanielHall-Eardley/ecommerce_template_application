@@ -50,6 +50,7 @@ const OrderSchema = Schema({
     required: true,
     default: false,
   },
+  postageLabels: Array,
   paymentId: String,
   fulfilled: {
     type: Boolean,

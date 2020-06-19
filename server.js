@@ -12,41 +12,23 @@ if (process.env.USERNAME === 'daniel') {
 }
 
 const mongoose = require('mongoose')
-const stripe = require('./helper/stripe')
 
 const adminRoutes = require('./routes/adminRoutes')
 const checkoutRoutes = require('./routes/checkoutRoutes')
 const userRoutes = require('./routes/userRoutes')
 const productRoutes = require('./routes/productRoutes')
 const orderRoutes = require('./routes/orderRoutes')
+const webhookRoutes = require('./routes/webhookRoutes')
 
-const Order = require('./models/order')
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
-app.post('/webhook/stripe', express.raw({type: 'application/json'}), async (req, res,  next) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-  }
-  catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  console.log('confirmed payment', event)
-  const order = await Order.findOne({paymentId: event.id})
-  //print shipping labels for relevant orders
-  res.status(200).json({received: true})
-})
-
-app.use(express.json())
 app.use((req, res, next) => {
   res.set("Access-Control-Allow-Origin", "*");
   res.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
   res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
+
+app.use('/webhook', webhookRoutes)
+app.use(express.json())
 
 app.use('/admin', adminRoutes)
 app.use('/checkout', checkoutRoutes)

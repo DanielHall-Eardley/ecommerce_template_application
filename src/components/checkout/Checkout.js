@@ -119,7 +119,7 @@ const Checkout = (props) => {
     if (result.paymentIntent.status === "succeeded") {
       console.log(result)
       props.displayNotification(['Payment confirmed'])
-      navigate.push('/')
+      navigate.push('/product')
       setLoading(false)
     }
   }

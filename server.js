@@ -23,7 +23,7 @@ const orderRoutes = require('./routes/orderRoutes')
 const Order = require('./models/order')
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
-app.post('/webhook', express.raw({type: 'application/json'}), async (req, res,  next) => {
+app.post('/webhook/stripe', express.raw({type: 'application/json'}), async (req, res,  next) => {
   const sig = req.headers['stripe-signature'];
   let event;
 

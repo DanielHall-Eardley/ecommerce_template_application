@@ -3,15 +3,11 @@
   overflow-y: auto;
   display: grid;
   grid-template-columns: 40rem 1fr;
-  grid-template-rows: min-content 40rem auto;
+  grid-template-rows: min-content 40rem auto auto;
 }
 
 .heading {
   display: flex;
-  padding: var(--spacing-sm);
-  border-bottom: var(--bdr-light);
-  font-size: var(--font-lg);
-  color: var(--golden);
   justify-content: space-between;
   grid-column: 1 / -1;
 }
@@ -19,6 +15,7 @@
 .images {
   position: relative;
   padding: var(--spacing-md);
+  border-bottom: var(--bdr-light);
 }
 
 .inc, .dec {
@@ -43,13 +40,20 @@
 }
 
 .listItem {
-  margin-top: var(--spacing-md);
   font-size: var(--font-md);
+  margin-left: var(--spacing-md);
+}
+
+.listItem:not(:last-child) {
+  margin-bottom: var(--spacing-md);
 }
 
 .description {
   font-size: var(--font-md);
   padding: var(--spacing-md) 8vw;
+  border-bottom: var(--bdr-light);
+  height: 100%;
+  overflow-y: auto;
 }
 
 .id {
@@ -61,10 +65,9 @@
   display: grid;
   font-size: var(--font-md);
   grid-template-columns: repeat(4, max-content);
-  grid-template-rows: min-content min-content;
-  justify-content: end;
-  align-content: end;
+  grid-template-rows: min-content min-content min-content;
   padding: var(--spacing-md);
+  grid-column: 1 / -1
 }
 
 .dimensions span {
@@ -87,6 +90,19 @@
 }
 
 .specifications {
-  padding: var(--spacing-md);
-  list-style: none;
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  grid-column: 1 / -1
 };
+
+.specifications ul {
+  list-style: none;
+}
+
+.specifications h2, .dimensions h2 {
+  font-size: var(--font-md);
+  grid-column: 1 / -1;
+  margin-bottom: .8rem;
+  color: var(--golden);
+}

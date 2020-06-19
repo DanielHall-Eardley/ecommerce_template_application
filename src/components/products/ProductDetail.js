@@ -120,7 +120,7 @@ const ProductDetail = props => {
   
   return (
     <section className={styles.container}>
-      <h1 className={styles.heading}>
+      <h1 className={styles.heading + ' heading'}>
         <span>{name}</span>
         <span>${price}</span>
       </h1>
@@ -136,10 +136,14 @@ const ProductDetail = props => {
         </button>
       </div>
       <p className={styles.description}>{description}</p>
-      <ul className={styles.specifications}>
-        {specificationList(specifications)}
-      </ul>
+      <div className={styles.specifications}>
+        <h2>Technical specifications</h2>
+        <ul>
+          {specificationList(specifications)}
+        </ul>
+      </div>
       <div className={styles.dimensions}>
+        <h2>Dimensions</h2>
         <span>Weight</span>
         <span>Height</span>
         <span>Width</span>

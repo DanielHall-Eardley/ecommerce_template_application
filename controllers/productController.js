@@ -35,35 +35,12 @@ exports.create = async (req, res, next) => {
   try {
     checkValidationErr(req)
    
-    const photoUrlArray = []
-    if (req.files && req.files.photos && !Array.isArray(req.files.photos)) {
-      const uploadPhoto = req.files.photos
-      uploadPhoto.mv('./images/' + uploadPhoto.name, error => {
-        if (error) {
-          errorHandler(500, ['Unable to upload your photo'])
-        }
-      })
-      photoUrlArray.push('/images/' + uploadPhoto.name)
-    }
-
-    if (req.files && req.files.photos && Array.isArray(req.files.photos)) {
-      const uploadPhotos = req.files.photos
-      uploadPhotos.forEach(photo => {
-        photo.mv('./images/' + photo.name, error => {
-          if (error) {
-            errorHandler(500, ['Unable to upload your photo'])
-          }
-        })
-        photoUrlArray.push('/images/' + photo.name)
-      })
-    }
-   
     const product = new Product({
       name: req.body.name,
       price: req.body.price,
       specialPrice: req.body.specialPrice,
       description: req.body.description,
-      photoArray: photoUrlArray,
+      photoArray: req.body.photoArray,
       specifications: req.body.specificationArray,
       weight: req.body.weight,
       height: req.body.height,

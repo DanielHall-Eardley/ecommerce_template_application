@@ -18,7 +18,7 @@ import {storeOrderSummary} from '../../actions/order'
 import {apiHost} from '../../global'
 
 const Login = (props) => {
-  const history = useHistory()
+  const navigate = useHistory()
 
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
@@ -53,32 +53,36 @@ const Login = (props) => {
 
     props.storeUser(loginResponse.user)
 
-    const res = await fetch(apiHost + '/order/summary/' + loginResponse.user.userId, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': loginResponse.user.token
+    if (props.userType === 'customer') {
+      const res = await fetch(apiHost + '/order/summary/' + loginResponse.user.userId, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': loginResponse.user.token
+        }
+      }, [])
+  
+      const orderResponse = await res.json()
+  
+      if (orderResponse.error) {
+        return
       }
-    }, [])
-
-    const orderResponse = await res.json()
-
-    if (orderResponse.error) {
-      return
+  
+      props.storeOrderSummary(orderResponse)
     }
-
-    props.storeOrderSummary(orderResponse)
     
-    history.push('/')
+    navigate.push('/product')
   }
 
   return (
     <section>
       <form onSubmit={login} className={styles.login}>
+        <label htmlFor="">Email</label>
         <input 
           type="email" 
           placeholder='Email'
           value={email}
           onChange={(event) => setEmail(event.target.value)}/>
+        <label htmlFor="">Password</label>
         <input 
           type="password" 
           placeholder="Password"
@@ -92,7 +96,8 @@ const Login = (props) => {
 
 const mapStateToProps = state => {
   return {
-    token: state.user.token
+    token: state.user.token,
+    userType: state.user.userType
   }
 }
 

@@ -7,6 +7,9 @@
   --white: white;
   --light-grey: lightgrey;
   --golden: #fc8803;
+  --light-gold: #f0ecd1;
+  --charcoal: #262625;
+  --brown:#61584a;
 
   /*fonts*/
   --font-sm: 1.7rem;
@@ -107,7 +110,12 @@ input:focus {
   border-radius: var(--bdr-rad);
   outline: none;
   background-color: var(--pink);
-  color: white;
+  color: var(--brown);
+}
+
+.primary-btn:hover, button:hover {
+  background-color: var(--golden);
+  color: var(--white);
 }
 
 @media screen and (max-width: 600px) {
@@ -127,7 +135,6 @@ img {
 
 p {
   line-height: 150%;
-  word-break: break-all;
   word-spacing: 3px;
   white-space: pre-line;
   overflow: hidden;
@@ -145,7 +152,6 @@ label {
 
 .heading {
   font-size: var(--font-md);
-  margin-bottom: var(--spacing-sm);
   background-color: var(--golden);
   padding: var(--spacing-sm);
   color: var(--white);

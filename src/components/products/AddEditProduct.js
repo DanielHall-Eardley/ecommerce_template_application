@@ -37,11 +37,14 @@ const AddEditProduct = props => {
     props.clearError()
 
     const headers = {
+      'Authorization': props.token,
       'Content-Type': 'application/json'
     }
 
     const getProduct = async (headers) => {
-      const response = await api('/product/update/', {}, headers, 'GET')
+      const response = await api('/product/update/', {
+        headers
+      })
 
       if (response.error) {
         props.displayError(response.error)
@@ -50,7 +53,6 @@ const AddEditProduct = props => {
     }
 
     const oldProduct = getProduct(headers)
-    console.log(oldProduct)
 
     oldName = oldProduct.name
     oldPrice = oldProduct.price
@@ -71,10 +73,10 @@ const AddEditProduct = props => {
     content: ''
   })
   const [specificationArray, setSpecification] = useState(oldSpecifications)
-  const [weight, setWeight] = useState(0)
-  const [width, setWidth] = useState(0)
-  const [height, setHeight] = useState(0)
-  const [length, setLength] = useState(0)
+  const [weight, setWeight] = useState('')
+  const [width, setWidth] = useState('')
+  const [height, setHeight] = useState('')
+  const [length, setLength] = useState('')
 
   const removeSpec = (name) => {
     const filteredArray = specificationArray.filter(spec => spec.name !== name)
@@ -104,30 +106,24 @@ const AddEditProduct = props => {
     }
 
     const headers = {
-    'Authorization': props.token
+      'Authorization': props.token,
+      'Content-Type': 'application/json'
     }
 
     const product = JSON.stringify({
       name,
       description,
-      price,
-      specialPrice,
+      price: parseInt(price),
+      specialPrice: parseInt(specialPrice),
       specificationArray,
       width,
       height,
       length,
       weight,
+      photoArray
     })
 
-    const photoFileArray = fileArray.filter(el => typeof el === "object")
-
-    const formData = new FormData()
-    formData.append('product', product)
-    photoFileArray.forEach(photo => {
-      formData.append("photos", photo)
-    })
-
-    const response = await api(url, formData, headers, 'POST')
+    const response = await api(url, product, headers, 'POST')
   
     if (response.error) {
       return props.displayError(response.error)

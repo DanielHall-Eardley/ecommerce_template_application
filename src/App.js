@@ -58,14 +58,15 @@ const App = props => {
 
       props.storeOrderSummary(response)
     }
-
-    getOrderSummary(result.user.userId, result.user.token)
+    if (props.userType === 'customer') {
+      getOrderSummary(result.user.userId, result.user.token)
+    }
   }, [])
 
   return (
     <Router>
       <header>
-        <Title title='Custom PC'/>
+        <Title title='Ecommerce Demo Website'/>
         <Menu/>
       </header>
       <Notification error={props.error} notification={props.notification}/> 
@@ -81,7 +82,10 @@ const App = props => {
             <Checkout/>
           </Elements>
         </Route>
-        <Route path='/signup'>
+        <Route path='/user/signup'>
+          <Signup/>
+        </Route>
+        <Route path='/admin/signup'>
           <Signup/>
         </Route>
         <Route path='/login'>
@@ -91,7 +95,6 @@ const App = props => {
           <Landing/>
         </Route>
       </Switch>
-      <footer></footer>
     </Router>
   );
 }
@@ -100,6 +103,7 @@ const mapStateToProps = state => {
   return {
     error: state.notification.error,
     notification: state.notification.notification,
+    userType: state.user.userType
   }
 }
 

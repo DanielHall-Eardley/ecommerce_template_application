@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  font-size: var(--font-md);
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  background-color: var(--charcoal);
+}
+
+.links {
+  list-style: none;
+}
+
+.links li, .copyright{
+  color: var(--brown);
+
+}

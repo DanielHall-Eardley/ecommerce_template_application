@@ -3,15 +3,18 @@ const errorHandler = require('../helper/errorHandler')
 const bcrypt = require("bcrypt")
 const checkValidationErr = require('../helper/checkValidationErr')
 
+/*This function creates an admin user, restrictions are disabled 
+for the demo version of the website, in production one super admin will
+be created initally that can add new admin users. */
 exports.signup = async (req, res, next) => {
   try {
-    const checkUserType = User.findById(req.body.userId)
-    if (
-			process.env.FIRST_LOGIN === 'false' && 
-			checkUserType.type !== 'admin'
-		) {
-      errorHandler(401, ['You are not authorized to create an admin account'])
-    }
+    // const checkUserType = User.findById(req.body.userId)
+    // if (
+		// 	process.env.FIRST_LOGIN === 'false' && 
+		// 	checkUserType.type !== 'admin'
+		// ) {
+    //   errorHandler(401, ['You are not authorized to create an admin account'])
+    // }
 
     checkValidationErr(req)
 

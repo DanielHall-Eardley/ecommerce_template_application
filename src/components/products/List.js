@@ -6,7 +6,7 @@ import {Link} from 'react-router-dom'
 
 const List = props => {
   const [currentProductList, setList] = useState([])
-  console.log(props)
+
   useEffect(() => {
     if (props.searching) {
       setList(props.filteredList)
@@ -30,7 +30,7 @@ const List = props => {
 
     return productList
   }
-  console.log(currentProductList)
+
   return (
     <section className={styles.container}>
       {productList(currentProductList)}

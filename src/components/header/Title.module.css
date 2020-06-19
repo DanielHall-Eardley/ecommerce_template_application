@@ -2,7 +2,7 @@
   margin-right: auto;
   margin-left: var(--spacing-md);
   font-size: var(--font-lg);
-  color: var(--pink);
+  color: var(--golden);
   display: flex;
   align-items: center;
 }

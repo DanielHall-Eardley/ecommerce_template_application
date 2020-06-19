@@ -5,11 +5,12 @@ const {User} = require('../models/user')
 const checkValidationErr = require('../helper/checkValidationErr')
 const {add, format} = require('date-fns')
 
+/*This function signs up customer users */
 exports.signup = async (req, res, next) => {
   try {
-		if (process.env.FIRST_LOGIN === 'true') {
-			return res.redirect(307, '/admin/signup')
-		}
+		// if (process.env.FIRST_LOGIN === 'true') {
+		// 	return res.redirect(307, '/admin/signup')
+		// }
 
     checkValidationErr(req)
 
@@ -45,7 +46,9 @@ exports.signup = async (req, res, next) => {
   }
 }
 
-
+/*This function logs in users by creating a JWT token, which can
+be susquently used access protected resources. A expiration date is also
+created to inform the client if the JWT token has expired or not*/
 exports.login = async (req, res, next) => {
 	try {
 		const findUser = await User.findOne({email: req.body.email})

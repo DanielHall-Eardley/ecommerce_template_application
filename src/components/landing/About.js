@@ -4,10 +4,10 @@ import '../../Global.css'
 
 export default props => {
   return (
-    <div>
-      <h1 className='heading'>About Custom PC</h1>
+    <div className={styles.container}>
+      <h1 className='heading'>About This Website</h1>
       <p className={styles.text}>
-        Without niches, you will lack social networks. Without development, you will lack experiences. A company that can synthesize courageously will (eventually) be able to transition easily. The capacity to enable perfectly leads to the capacity to enable perfectly leads to the capacity to synthesize interactively. That is a remarkable achievement taking into account this month's financial state of things! If all of this sounds astonishing to you, that's because it is! What does the term 'structuring'. Without development, you will lack affiliate-based compliance. Is it more important for something to be best-of-breed? The portals factor can be delivered as-a-service to wherever it’s intended to go – mobile. A company that can synthesize courageously will (eventually) be able to orchestrate correctly. It may seem terrific, but it's 100 percent true! Your budget for engaging should be at least three times your budget for innovating should be at least one-half of your budget for harnessing. Imagine a combination of OWL and PHP. What does the buzzword 'technologies' really mean? Think granular. It may seem confusing, but it's 100% realistic! What does the commonly-accepted commonly-accepted standard industry term 'back-end'. Imagine a combination of Perl and FOAF. Without niches, you will lack social networks.
+        This is a ecommerce demo website, it includes basic features such as product creation and order management. Potential customers can browse, search for products and when ready can create an account to purchase products. On the business side of things Stripe is used in combination with Easypost to automatically accept payments and generate shipping labels. The application is in test mode, so feel free to try out all the features. This website is just a simple example of what I can build, I can build a fully customized solution to suit your business's needs. My goal is help small to medium sized businesses who are trying enter the online marketplace.
       </p>
     </div>
   )

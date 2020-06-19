@@ -14,7 +14,6 @@ const Menu = props => {
       <nav className={styles.nav}>
         <NavLink to='/product'>Products</NavLink>
         <NavLink to='/order'>Orders</NavLink>
-        <NavLink to='/signup?type=admin'>Add New Admin User</NavLink>
         <span className='default-link' onClick={props.clearUser}>Logout</span>
         <NavLink exact={true} to='/'>Home</NavLink> 
       </nav>
@@ -33,10 +32,11 @@ const Menu = props => {
   } else {
     return (
       <nav className={styles.nav}>
-        <NavLink to='/product'>Products</NavLink>
         <NavLink exact={true} to='/'>Home</NavLink> 
+        <NavLink to='/product'>Products</NavLink>
         <NavLink to='/login'>Login</NavLink>
-        <NavLink to='/signup'>Signup</NavLink>
+        <NavLink exact={true} to='/user/signup'>Signup as a Customer</NavLink>
+        <NavLink exact={true} to='/admin/signup'>Signup as a Business</NavLink>
       </nav>
     )
   }

@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import styles from './Signup.module.css'
 import '../../Global.css'
-import {useHistory, useLocation} from 'react-router-dom'
+import {useLocation, useHistory} from 'react-router-dom'
 import api from '../../helper/api'
 import {connect} from 'react-redux'
 import {
@@ -10,28 +10,14 @@ import {
   displayNotification,
   clearNotification
 } from '../../actions/notification'
-import Notification from '../notification/Notification'
-
-const useQuery = () => {
-  return new URLSearchParams(useLocation().search);
-}
 
 const Signup = (props) => {
-  const query = useQuery()
-  const history = useHistory()
-
+  const location = useLocation()
+  const navigate = useHistory()
+ 
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
-
-  const endpoint = (query) => {
-    const create = query.get('type')
-    if (create === 'admin') {
-      return '/admin/signup'
-    }
-
-    return '/user/signup'
-  }
 
   const signup = async (event) => {
     event.preventDefault()
@@ -49,21 +35,18 @@ const Signup = (props) => {
       userId: props.userId
     })
 
-    const url = endpoint(query)
-    console.log(url)
-    const response = await api(url, body, headers, 'POST')
+    const response = await api(location.pathname, body, headers, 'POST')
 
     if (response.error) {
       return props.displayError(response.error)
     }
 
     props.displayNotification(response.message)
-    history.push('/login')
+    navigate.push('/login')
   }
 
   return (
     <section className={styles.container}>
-      <Notification error={props.error} notification={props.notification}/>
       <form onSubmit={signup} className={styles.signup}>
         <input 
           placeholder='Enter Name'

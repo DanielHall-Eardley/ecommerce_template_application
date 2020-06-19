@@ -1,4 +1,10 @@
+.container {
+  background-color: var(--light-gold);
+}
+
 .text {
-  font-size: var(--font-sm);
-  margin: 0 8vw;
+  font-size: var(--font-md);
+  margin: 0 12vw;
+  background-color: var(--white);
+  padding: var(--spacing-lg);
 }

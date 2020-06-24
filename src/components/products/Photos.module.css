@@ -4,8 +4,9 @@
 
 .upload{
   display: inline-block;
-  padding-top: .7rem;
+  padding-top: .8rem;
   margin-bottom: 0;
+  margin-right: var(--spacing-sm);
 }
 
 .photoPreview {

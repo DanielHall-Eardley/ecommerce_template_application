@@ -7,7 +7,7 @@
   align-items: center;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 900px) {
   .title {
     margin-top: var(--spacing-md);
     margin-bottom: var(--spacing-sm);

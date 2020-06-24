@@ -1,16 +1,42 @@
 .container {
   display: flex;
   align-items: center;
-  height: 8vh;
+  height: 10vh;
   border-bottom: var(--bdr-light);
   padding: 0 var(--spacing-sm);
+}
+
+.container button {
+  height: 6vh;
 }
 
 .input {
   flex: 1;
   margin-right: var(--spacing-sm);
+  height: 6vh;
+  font-size: var(--font-md);
 }
 
 .btnMargin {
   margin-left: var(--spacing-sm);
+}
+
+@media screen and (max-width: 700px) {
+  .container {
+    height: auto;
+    display: grid;
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    grid-auto-flow: dense;
+  }
+
+  .input {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .container button {
+    margin: 0;
+  }
 }

@@ -46,16 +46,18 @@ const OrderSchema = Schema({
     default: false,
   },
   payment: {
-    type: Boolean,
-    required: true,
-    default: false,
+    type: Date,
+    default: null
   },
-  postageLabels: Array,
   paymentId: String,
+  clientPhoneNumber: String,
   fulfilled: {
-    type: Boolean,
-    required: true,
-    default: false,
+    type: Date,
+    default: null,
+  },
+  paymentIntentSecret: {
+    type: String,
+    default: null
   },
   status: {
     type: String,
@@ -73,7 +75,7 @@ const OrderSchema = Schema({
   selectLowestRate: {
     type: Boolean,
     default: false
-  }
+  },
 }, {
   timestamps: true
 })

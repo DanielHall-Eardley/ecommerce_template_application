@@ -20,6 +20,10 @@ const ShipmentSchema = Schema({
   selectedRateId: {
     type: String,
     default: null
+  },
+  postageLabel: {
+    type: String,
+    default: null
   }
 })
 

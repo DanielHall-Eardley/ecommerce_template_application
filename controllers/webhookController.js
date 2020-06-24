@@ -17,10 +17,14 @@ exports.stripe = async (req, res,  next) => {
   res.status(200).json({received: true})
   console.log('confirmed payment', paymentEvent)
   try {
+    const order = await Order.findOne({paymentId: paymentEvent.id})
+
+    if (order.payment) {
+      errorHandler(500, ['This order has already recieved payment'])
+    }
+
     switch (paymentEvent.type) {
       case 'payment_intent.succeeded':
-        const order = await Order.findOne({paymentId: paymentEvent.id})
-
         for (let shipment of order.shipments) {
           const retrievedShipment = await postApi.Shipment.retrieve(shipment.shipmentId)
         

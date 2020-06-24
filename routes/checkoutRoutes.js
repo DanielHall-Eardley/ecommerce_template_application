@@ -8,6 +8,10 @@ router.post('/postage-rates', isAuth, checkoutController.getPostageRates)
 
 router.post('/confirm/postage-rates', isAuth, checkoutController.confirmPostageRates)
 
+router.put('/confirm/payment', isAuth, checkoutController.confirmPayment)
+
 router.put('/remove-product', isAuth, checkoutController.removeProduct)
+
+router.delete('/cancel-order', isAuth, checkoutController.cancelOrder)
 
 module.exports = router

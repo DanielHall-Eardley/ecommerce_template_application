@@ -8,11 +8,9 @@ import {
 import {connect} from 'react-redux'
 
 const Photos = props => {
-  const photoPreviewArray = props.photoArray
-
   const uploadPhoto = (e) => {
     props.clearError()
-    let photoArray = [...photoPreviewArray]
+    let photoArray = [...props.photoArray]
 
     let fileArray = []
     for (let i = 0; i < e.target.files.length; i++) {
@@ -55,6 +53,7 @@ const Photos = props => {
     
     props.setPhotoArray(photoArray)
     props.setFileArray(fileArray)
+    console.log(fileArray )
   }
 
   const checkFileType = (fileType) => {
@@ -87,7 +86,7 @@ const Photos = props => {
     return array.map(photo => {
       return (
         <div key={photo.filePath} className={styles.photo}>
-          <img src={photo.filePath}/>
+          <img src={photo.filePath} alt=''/>
           <label>{photo.fileSize}</label>
         </div>
       )
@@ -97,8 +96,13 @@ const Photos = props => {
   return (
     <div className={styles.container}>
       <label htmlFor="photo-upload" className={styles.upload + ' primary-btn'}>
-        Add photos
+        Select photos
       </label>
+      {!props.uploadComplete ?
+        <button onClick={props.uploadPhotosToS3}>
+          Upload Selected Photos
+        </button>
+      : null }
       <input 
         type="file"
         accept="image/*"
@@ -107,7 +111,7 @@ const Photos = props => {
         id="photo-upload"
         onInput={uploadPhoto}/>
       <div className={styles.photoPreview}>
-        {renderArray(photoPreviewArray)}
+        {renderArray(props.photoArray)}
       </div>
     </div>
   )

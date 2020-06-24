@@ -1,57 +1,87 @@
 import React from 'react'
 import styles from './List.module.css'
 import '../../Global.css'
+import {format} from 'date-fns'
 
-export default ({orderList, userType}) => {
+export default ({orderList, userType, fulfillOrder, getlabels}) => {
   let orderArray = orderList
   if (!Array.isArray(orderList)) {
     orderArray = [orderArray]
+  }
+
+  const productOrShipmentList = (order, userType) => {
+    if (userType === 'admin' && !order.fulfilled) {
+      return order.shipments.map(shipment => {
+        return (
+          <li key={shipment.shipmentId} className={styles.productItem}>
+            <span>Product Id: {shipment.productId}</span>
+            <span>Name: {shipment.productName}</span>
+            { shipment.postageLabel ?
+              <a href={shipment.postageLabel}>Print Label</a>
+            : null }  
+          </li>
+        )
+      })
+    } else {
+      return order.products.map(product => {
+        return (
+          <li key={product.name} className={styles.productItem}>
+            <span>Product Id: {product._id}</span>
+            <span>Name: {product.name}</span>
+            <span>${product.price}</span>
+          </li>
+        )
+      })
+    }
   }
   
   const renderOrderList = (orders) => {
     return orders.map(order => {
       return (
         <div className={styles.listItem} key={order._id}>
-          <h3>
+          <h3 className={styles.header}>
             <span>Order Id: {order._id}</span>
             <span>Status: {order.status}</span>
-            <span>Placed: {order.updatedAt}</span>
+            <span>
+            { order.fulfilled ?
+              'Sent: ' + format(new Date(order.fulfilled), "do MMM yyyy") :
+              'Placed: ' + format(new Date(order.payment), "do MMM yyyy")}
+            </span>
+            
           </h3>
           <ul className={styles.products} >
-            { order.products.map(product => {
-              return (
-                <li key={product.name} className={styles.productItem}>
-                  <span>Product Id: {product._id}</span>
-                  <span>Name: {product.name}</span>
-                  <span>${product.price}</span>
-                </li>
-              )
-            })}
+            {productOrShipmentList(order, userType)}
+          </ul>
+          <ul className={styles.address}>
+            <li>Street: {order.customerAddress.street1}</li>
+            <li>
+              Apt/Unit: {order.customerAddress.street2}
+            </li>
+            <li>City: {order.customerAddress.city}</li>
+            <li>State: {order.customerAddress.state}</li>
+            <li>Country: {order.customerAddress.country}</li>
+            <li>Zip/Postcode: {order.customerAddress.zip}</li>
           </ul>
           { userType === 'admin' ?
-            <div>
-              <ul className={styles.address}>
-                <span>Street1: {order.destination.street1}</span>
-                <span>Street2: {order.destination.street2}</span>
-                <span>city: {order.destination.city}</span>
-                <span>state: {order.destination.state}</span>
-                <span>Country: {order.destination.country}</span>
-                <span>Zip/Postcode: {order.destination.zip}</span>
-              </ul>
-              <ul className={styles.recipient}>
-                <span>Customer: {order.customerName}</span>
-                <span>Email: {order.customerEmail}</span>
-              </ul> 
-            </div>
-            : null
-          }
+            <div className={styles.recipient}>
+              <span>Customer: {order.customerName}</span>
+              <span>Email: {order.customerEmail}</span>
+              <span>Phone: {order.clientPhoneNumber}</span>
+            </div> 
+          : null }
           <div className={styles.footer}>
-          <span>Amount of items: {order.count}</span>
-          <span>Total: {order.total}</span>
-          { userType === 'admin' ? 
-            <button>Print Shipping Label</button> :
-            null
-          }
+            { userType === 'admin' && !order.fulfilled ? 
+              <button onClick={() => fulfillOrder(order._id)}>
+                Mark as fulfilled
+              </button>
+            : null }
+            { userType === 'admin' && !order.shipments[0].postageLabel ?
+              <button onClick={() => getlabels(order._id)}>
+                Buy Shipping Labels
+              </button> 
+            : null }  
+            <span>Amount of items: {order.count}</span>
+            <span>Total: {order.total}</span>
           </div>
         </div>
       )

@@ -5,6 +5,12 @@
 .text {
   font-size: var(--font-md);
   margin: 0 12vw;
-  background-color: var(--white);
+  background-color: var(--light-purple);
   padding: var(--spacing-lg);
+}
+
+@media screen and (max-width: 600px) {
+  .text {
+    margin: 0;
+  }
 }

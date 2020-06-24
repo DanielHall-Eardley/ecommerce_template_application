@@ -11,6 +11,7 @@ import {
   clearError
 } from '../../actions/notification'
 import {apiHost} from '../../global'
+import api from '../../helper/api'
 import checkLogin from '../../helper/checkLogin'
 
 import List from './List'
@@ -43,16 +44,16 @@ const ProductDetail = props => {
       const response = await res.json()
 
       if (response.error) {
-        return displayError(response.error)
+        return props.displayError(response.error)
       }
 
       if (
         response.past.length < 1 
         && (!response.pending || response.pending.length < 1)
         ) {
-        return displayNotification('No orders found')
+        return props.displayNotification('No orders found')
       }
-      console.log(response)
+      
       props.storeOrderList(response.past, response.pending)
     }
     
@@ -60,6 +61,46 @@ const ProductDetail = props => {
       getOrderList(props.user.userId, props.user.token)
     }
   }, [props.user.token]) 
+
+  const getlabels = async (orderId) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': props.user.token
+    }
+
+    const body = JSON.stringify({
+      userId: props.user.userId,
+      orderId,
+    })
+    
+    const response = await api('/order/postage-label', body, headers, 'POST')
+    
+    if (response.error) {
+      return props.displayError(response.error)
+    }
+
+    props.storeOrderList(response.past, response.pending)
+  }
+
+  const fulfillOrder = async (orderId) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': props.user.token
+    }
+
+    const body = JSON.stringify({
+      userId: props.user.userId,
+      orderId,
+    })
+    
+    const response = await api('/order/fulfill', body, headers, 'PUT')
+
+    if (response.error) {
+      return props.displayError(response.error)
+    }
+
+    props.storeOrderList(response.past, response.pending)
+  }
 
   return (
     <section>
@@ -70,7 +111,7 @@ const ProductDetail = props => {
             styles.selected : null
           }
           onClick={() => setList('past')}>
-          Past
+          Fulfilled
         </span>
         <span 
           className={
@@ -81,7 +122,11 @@ const ProductDetail = props => {
           Pending
         </span>
       </div>
-      <List orderList={props[selectedOrderList + 'OrderList']} userType={props.user.type}/>
+      <List 
+        orderList={props[selectedOrderList + 'OrderList']} 
+        userType={props.user.type}
+        fulfillOrder={fulfillOrder}
+        getlabels={getlabels}/>
     </section>
   )
 }

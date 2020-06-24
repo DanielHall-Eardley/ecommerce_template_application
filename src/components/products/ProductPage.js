@@ -1,5 +1,4 @@
 import React, {useEffect} from 'react'
-import styles from './ProductList.module.css'
 import '../../Global.css'
 import {connect} from 'react-redux'
 import {apiHost} from '../../global'
@@ -20,7 +19,9 @@ import AddEditProduct from './AddEditProduct'
 import List from './List'
 import ProductDetail from './ProductDetail'
 
-const ProductList = props => {
+/*This component contains nested routes for creating, updating 
+and viewing the product list and individual product details */
+const ProductPage = props => {
   useEffect(() => {
     props.clearError()
 
@@ -41,7 +42,7 @@ const ProductList = props => {
   const {path} = useRouteMatch();
 
   return (
-    <main className={styles.container}>
+    <main>
       <Search/>
       <Switch>
         <Route exact path={path}>
@@ -72,4 +73,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   null,
   mapDispatchToProps
-)(ProductList)
+)(ProductPage)

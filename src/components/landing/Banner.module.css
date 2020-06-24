@@ -1,4 +1,10 @@
 .container {
-  height: 50vh;
+  height: 82vh;
   width: 100%;
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    height: 45vh;
+  }
 }

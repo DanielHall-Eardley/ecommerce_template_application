@@ -4,11 +4,15 @@ import '../../Global.css'
 import {NavLink} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {clearUser} from '../../actions/user'
+import sprite from '../../sprite.svg'
 
+/*This component conditionally renders a navigation menu and cart total
+based on login status and user type*/
 const Menu = props => {
   const userId = props.user.userId
   const userType = props.user.type
 
+  /*This if statement renders the business admin menu*/
   if (userId && userType === 'admin') {
     return (
       <nav className={styles.nav}>
@@ -18,7 +22,9 @@ const Menu = props => {
         <NavLink exact={true} to='/'>Home</NavLink> 
       </nav>
     )
-  } else if (userId) {
+    } else if (userId) {
+
+    /*This if statement renders the customer menu*/
     return (
       <nav className={styles.nav}>
         <NavLink to='/product'>Products</NavLink>
@@ -26,11 +32,21 @@ const Menu = props => {
         <NavLink to='/checkout'>Checkout</NavLink>
         <NavLink exact={true} to='/'>Home</NavLink> 
         <span className='default-link' onClick={props.clearUser}>Logout</span>
-        <span className='default-link'>Cart: {props.orderSummary.count}</span>
+        <div className={styles.cartContainer}>
+          <svg className={ props.orderSummary.count > 0 ? styles.cart + ' ' + styles.highlight : styles.cart}>
+            <use href={sprite + '#icon-cart'}></use>
+          </svg>
+          { props.orderSummary.count > 0 ?
+            <span className={styles.cartTotal}>{props.orderSummary.count}</span>
+          : null}
+        </div>
       </nav>
     )
   } else {
     return (
+      /*This else statement renders the default menu for if
+      no user is logged in. Only the products page can be accessed
+      in this state*/
       <nav className={styles.nav}>
         <NavLink exact={true} to='/'>Home</NavLink> 
         <NavLink to='/product'>Products</NavLink>

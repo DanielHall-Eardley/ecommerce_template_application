@@ -1,0 +1,35 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  background-color: var(--charcoal);
+  opacity: .9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  height: 6rem;
+  width: 6rem;
+  fill: var(--pink);
+  animation: .4s linear infinite spinner;
+}
+
+@keyframes spinner {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.msg {
+  font-size: var(--font-md);
+  color: var(--red);
+}

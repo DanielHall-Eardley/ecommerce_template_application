@@ -1,15 +1,18 @@
+/*Global styles and variables*/
+
 :root {
   /*color*/
-  --pink: pink;
+  --pink: #f76ab3;
   --grey: grey;
   --red: red;
   --blue: lightblue;
   --white: white;
   --light-grey: lightgrey;
   --golden: #fc8803;
-  --light-gold: #f0ecd1;
+  --light-gold: #f7f5e1;
   --charcoal: #262625;
   --brown:#61584a;
+  --light-purple: #f9f5ff;
 
   /*fonts*/
   --font-sm: 1.7rem;
@@ -35,6 +38,12 @@
 
 html {
   font-size: 62.25%;
+}
+
+@media screen and (max-width: 650px) {
+  html {
+    font-size: 48%;
+  }
 }
 
 
@@ -84,12 +93,6 @@ default-link:active, a:active{
   color: red;
 }
 
-header {
-  height: 10vh;
-  border-bottom: var(--bdr-light);
-  display: flex;
-}
-
 input, select {
   border-radius: var(--bdr-rad);
   border: var(--bdr-light);
@@ -110,20 +113,11 @@ input:focus {
   border-radius: var(--bdr-rad);
   outline: none;
   background-color: var(--pink);
-  color: var(--brown);
+  color: var(--white);
 }
 
 .primary-btn:hover, button:hover {
   background-color: var(--golden);
-  color: var(--white);
-}
-
-@media screen and (max-width: 600px) {
-  header {
-    flex-direction: column;
-    justify-content: center;
-    height: auto
-  }
 }
 
 img {

@@ -53,7 +53,7 @@ const Login = (props) => {
 
     props.storeUser(loginResponse.user)
 
-    if (props.userType === 'customer') {
+    if (loginResponse.user.type === 'customer') {
       const res = await fetch(apiHost + '/order/summary/' + loginResponse.user.userId, {
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,6 @@ const Login = (props) => {
 const mapStateToProps = state => {
   return {
     token: state.user.token,
-    userType: state.user.userType
   }
 }
 

@@ -10,4 +10,8 @@ router.post('/create', isAuth, orderController.create)
 
 router.post('/update', isAuth, orderController.update)
 
+router.post('/postage-label', isAuth, orderController.getLabels)
+
+router.put('/fulfill', isAuth, orderController.fulfill)
+
 module.exports = router

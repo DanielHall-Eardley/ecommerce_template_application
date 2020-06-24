@@ -11,7 +11,10 @@ import {
 import {useParams, Link} from 'react-router-dom'
 import {apiHost} from '../../global'
 import api from '../../helper/api'
+import sprite from '../../sprite.svg'
 
+/*This component shows the details for a selected
+product and allows said product to be added to the cart*/
 const ProductDetail = props => {
   const [selectedImage, setImage] = useState(0)
   const productId = useParams().id
@@ -24,7 +27,7 @@ const ProductDetail = props => {
     const specList = specs.map(spec => {
       return (
         <li className={styles.listItem} key={spec.name}>
-          <b>{spec.name}:</b> {spec.content}
+          <span>{spec.name}</span> {spec.content}
         </li>
       )
     })
@@ -35,23 +38,30 @@ const ProductDetail = props => {
   const changePhoto = (direction, end) => {
     const start = 0
 
-    if (selectedImage <= start || selectedImage >= end) {
-      return
-    }
-
     if (direction === 'inc') {
+      if (selectedImage === end) {
+        return
+      }
+
       setImage(selectedImage + 1)
     }
 
     if (direction === 'dec') {
+      if (selectedImage === start) {
+        return
+      }
+
       setImage(selectedImage - 1)
     }
+
+    console.log(selectedImage)
   }
 
-  const addToCart = async (productId) => {
+  /*This function either*/
+  const addToCart = async (productId, userId, token) => {
     props.clearError()
    
-    if (!props.token) {
+    if (!token) {
       return props.displayError('Please Log In')
     }
 
@@ -62,21 +72,20 @@ const ProductDetail = props => {
     }
 
     const headers = {
-      'Authorization': props.token,
+      'Authorization': token,
       'Content-Type': 'application/json'
     }
 
-    const body = {
+    const body = JSON.stringify({
       productId,
-      userId: props.userId,
-    }
+      userId: userId,
+    })
 
     if (url === '/order/update') {
       body.orderId = props.orderId
     }
-    const stringifiedBody= JSON.stringify(body)
-
-    const response = await api(url, stringifiedBody, headers, 'POST')
+    
+    const response = await api(url, body, headers, 'POST')
 
     if (response.error) {
       return props.displayError(response.error)
@@ -85,6 +94,8 @@ const ProductDetail = props => {
     props.storeOrderSummary(response)
   }
   
+  /*This function makes a request to the api to
+  get the product details and stores them in redux state*/
   useEffect(() => {
     clearError()
 
@@ -106,7 +117,6 @@ const ProductDetail = props => {
     name, 
     price,
     description,
-    specialPrice,
     specifications,
     photoArray,
     _id,
@@ -114,8 +124,6 @@ const ProductDetail = props => {
     height,
     width,
     length,
-    weightUnit,
-    measurementUnit
   } = props.product
   
   return (
@@ -126,38 +134,37 @@ const ProductDetail = props => {
       </h1>
       <div className={styles.images}>
         <img src={photoArray ? photoArray[selectedImage] : null} alt=""/>
-        <button className={styles.inc}
-          onClick={() => changePhoto('inc', photoArray.length)}>
-          {'>'}
-        </button>
-        <button className={styles.dec}
-          onClick={() => changePhoto('dec', photoArray.length)}>
-          {'<'}
-        </button>
+        <svg className={styles.inc}
+          onClick={() => changePhoto('inc', photoArray.length - 1)}>
+          <use href={sprite + '#icon-chevron-thin-right'}></use>
+        </svg>
+        <svg className={styles.dec}
+          onClick={() => changePhoto('dec', photoArray.length - 1)}>
+          <use href={sprite + '#icon-chevron-thin-left'}></use>
+        </svg>
       </div>
       <p className={styles.description}>{description}</p>
-      <div className={styles.specifications}>
-        <h2>Technical specifications</h2>
-        <ul>
-          {specificationList(specifications)}
-        </ul>
-      </div>
+      { specifications?.length > 1 || !specifications ?
+        <div className={styles.specifications}>
+          <h2>Technical specifications</h2>
+          <ul>
+            {specificationList(specifications)}
+          </ul>
+        </div>
+      : null}
       <div className={styles.dimensions}>
         <h2>Dimensions</h2>
-        <span>Weight</span>
-        <span>Height</span>
-        <span>Width</span>
-        <span>Length</span>
-        <span>{weight} {weightUnit}</span>
-        <span>{height} {measurementUnit}</span>
-        <span>{width} {measurementUnit}</span>
-        <span>{length} {measurementUnit}</span>
+        <ul>
+          <li className={styles.listItem}><span>Weight</span> {weight} lbs</li>
+          <li className={styles.listItem}><span>Height</span> {height} inches</li>
+          <li className={styles.listItem}><span>Width</span> {width} inches</li>
+          <li className={styles.listItem}><span>Length</span> {length} inches</li>
+        </ul>
       </div>
       <footer className={styles.footer}>
-        <span className={styles.id}>Product Id: {_id}</span>
         <Link to="/product">Back To Products</Link>
         {props.userType === 'customer' ?
-          <button onClick={() => addToCart(_id)}>Add To Cart</button>
+          <button onClick={() => addToCart(_id, props.userId, props.token)}>Add To Cart</button>
         : null}
       </footer>
     </section>

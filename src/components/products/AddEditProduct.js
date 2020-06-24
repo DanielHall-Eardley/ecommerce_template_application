@@ -14,6 +14,7 @@ import {
 } from '../../actions/notification'
 import {addProduct} from '../../actions/product'
 import api from '../../helper/api'
+import {uuid} from 'uuidv4'
 
 import Photos from './Photos'
 
@@ -58,7 +59,6 @@ const AddEditProduct = props => {
     oldPrice = oldProduct.price
     oldSpecialPrice = oldProduct.specialPrice
     oldDescription = oldProduct.description
-    oldPhotoArray = oldPhotoArray.photoArray
     oldSpecifications = oldSpecifications.specifications
   }
 
@@ -66,8 +66,9 @@ const AddEditProduct = props => {
   const [price, setPrice] = useState(oldPrice)
   const [specialPrice, setSpecialPrice] = useState(oldSpecialPrice)
   const [description, setDescription] = useState(oldDescription)
-  const [photoArray, setPhotoArray] = useState(oldPhotoArray)
-  const [fileArray, setFileArray] = useState([])
+  const [photoPreviewArray, setPhotoPreviewArray] = useState([])
+  const [photoFileArray, setPhotoFileArray] = useState([])
+  const [photoUrlArray, setPhotoUrlArray] = useState(null)
   const [specification, inputSpecification] = useState({
     name: '',
     content: ''
@@ -96,13 +97,81 @@ const AddEditProduct = props => {
     )
   })
 
+  const checkFileName = fileName => {
+    const regex = /[_!@#$%^?*&`~\/\\:"'|;\[\]\{\}=+<>]/gm
+    const checkForSpecialChar = fileName.match(regex)
+    return checkForSpecialChar
+  }
+
+  const uploadPhotos = async (event) => {
+    event.preventDefault()
+    props.clearError()
+
+    if (photoFileArray.length < 1) {
+      return props.displayError('No images selected')
+    }
+
+    const s3PhotoInfo = []
+    for (let file of photoFileArray) {
+      if (checkFileName(file.name)) {
+        return props.displayError('Only "-" "." special characters are allowed are allowed in file names')
+      }
+      
+      const s3FileUpload = {
+        fileName: `${file.name}_${uuid()}`,
+        fileExtension: file.type
+    }
+
+      s3PhotoInfo.push(s3FileUpload)
+    }
+
+    const photos = JSON.stringify({
+      s3PhotoInfo
+    })
+
+    const response = await api('/product/s3-signatures', photos, {
+      'Authorization': props.token,
+      'Content-Type': 'application/json'
+    }, 'POST')
+  
+    if (response.error) {
+      return props.displayError(response.error)
+    }
+
+    const photoUrlArray = []
+    for (let url of response.signatures) {
+      const urlToSave = url.split('?')[0]
+      const rawFileName = urlToSave.split('_')[0].split('.com/')[1]
+      const file = photoFileArray.find(file => file.name === rawFileName)
+
+      if (!file) {
+        return props.displayError('There was a problem uploading your images')
+      } 
+
+      const uploadResult = await fetch(url, {
+        headers : {
+          'Content-Type': file.type,
+        },
+        body: file,
+        method: 'PUT'
+      })
+
+      if (uploadResult.status !== 200) {
+        return props.displayError('There was a problem uploading your images')
+      }
+      photoUrlArray.push(urlToSave)
+    }
+
+    setPhotoUrlArray(photoUrlArray)
+  }
+
   const saveProduct = async (event) => {
     event.preventDefault()
     props.clearError()
     let url = '/product/create'
 
     if (path === 'update') {
-      url = 'product/update/' + id
+      url = '/product/update/' + id
     }
 
     const headers = {
@@ -120,7 +189,7 @@ const AddEditProduct = props => {
       height,
       length,
       weight,
-      photoArray
+      photoArray: photoUrlArray
     })
 
     const response = await api(url, product, headers, 'POST')
@@ -175,10 +244,12 @@ const AddEditProduct = props => {
           onChange={event => setDescription(event.target.value)}>
         </textarea>
         <Photos 
-          photoArray={photoArray} 
-          setPhotoArray={setPhotoArray}
-          fileArray={fileArray}
-          setFileArray={setFileArray}/>
+          uploadComplete={photoUrlArray}
+          uploadPhotosToS3={uploadPhotos}
+          photoArray={photoPreviewArray} 
+          setPhotoArray={setPhotoPreviewArray}
+          fileArray={photoFileArray}
+          setFileArray={setPhotoFileArray}/>
         <label>Add Product Specifications</label>
         <div className={styles.spec}>
           <input 

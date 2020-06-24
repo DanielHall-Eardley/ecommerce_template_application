@@ -14,7 +14,7 @@ import Title from './components/header/Title.js'
 import Landing from './components/landing/Landing.js'
 import Signup from './components/user/Signup.js'
 import Login from './components/user/Login.js'
-import ProductList from './components/products/ProductList.js'
+import ProductPage from './components/products/ProductPage.js'
 import OrderList from './components/orders/OrderList.js'
 import Notification from './components/notification/Notification'
 
@@ -29,13 +29,11 @@ import {stripeApiKey} from './global'
 const stripePromise = loadStripe(stripeApiKey)
 
 const App = props => {
-  const navigate = useHistory()
-
   useEffect(() => {
     props.clearError()
     
     const result = checkLogin()
- 
+    
     if (result.error) {
       return props.clearUser()
     }
@@ -58,7 +56,8 @@ const App = props => {
 
       props.storeOrderSummary(response)
     }
-    if (props.userType === 'customer') {
+
+    if (result.user.type === 'customer') {
       getOrderSummary(result.user.userId, result.user.token)
     }
   }, [])
@@ -75,7 +74,7 @@ const App = props => {
           <OrderList/>
         </Route>
         <Route path='/product'>
-          <ProductList/>
+          <ProductPage/>
         </Route>
         <Route path='/checkout'>
           <Elements stripe={stripePromise}>
@@ -103,7 +102,6 @@ const mapStateToProps = state => {
   return {
     error: state.notification.error,
     notification: state.notification.notification,
-    userType: state.user.userType
   }
 }
 

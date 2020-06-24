@@ -2,6 +2,7 @@ import {
   STORE_CURRENT_ORDER_SUMMARY,
   STORE_CURRENT_ORDER, 
   STORE_ORDER_LIST, 
+  CLEAR_ORDER
 } from '../actions/order'
 
 const initialState = {
@@ -32,6 +33,8 @@ const user = (state = initialState, action) => {
       ...state,
       summary: action.summary
     }
+    case CLEAR_ORDER: 
+    return initialState
     default: 
       return state
   }

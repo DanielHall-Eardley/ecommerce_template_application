@@ -10,8 +10,8 @@ exports.getSummary = async (req, res, next) => {
    
     const order = await Order.findOne({
       customerId: userId,
-      payment: false,
-      fulfilled:false
+      payment: null,
+      fulfilled: null
     })
     
     if (!order) {
@@ -37,8 +37,8 @@ exports.create = async (req, res, next) => {
     
     const checkForDuplicateOrder = await Order.findOne({
       customerId: userId,
-      payment: false,
-      fulfilled: false
+      payment: null,
+      fulfilled: null
     })
      
     if (checkForDuplicateOrder) {
@@ -84,14 +84,18 @@ exports.update = async (req, res, next) => {
     
     const order = await Order.findOne({
       customerId: userId, 
-      payment: false, 
-      fulfilled: false,
+      payment: null, 
+      fulfilled: null,
       _id: orderId
     })
     
     if (!order) {
       errorHandler(401, ['Order could not be found'])
     }
+
+    if (order.addressConfirmed) {
+      errorHandler(401, ['You cannot add new items once order details are finalized'])
+    } 
 
     const product = await Product.findById(productId)
 
@@ -103,43 +107,6 @@ exports.update = async (req, res, next) => {
       total += product.price
     }
 
-    let shipmentObj = null
-    if (order.addressConfirmed) {
-      const parcel = await new postApi.Parcel({
-        length: product.length,
-        height: product.height,
-        width: product.width,
-        weight: product.weight,
-      }).save()
-
-      const shipment = await new postApi.Shipment({
-        to_address: order.customerAddress.addressId,
-        from_address: order.returnAddress.addressId,
-        parcel: parcel
-      }).save()
-
-      const rateArray = shipment.rates.map(rate => {
-        return {
-          rateId: rate.id,
-          fee: rate.rate,
-          serviceName: rate.service,
-          carrier: rate.carrier,
-          deliveryTime: rate.est_delivery_days,
-          guaranteedDeliveryTime: rate.delivery_date_guaranteed
-        }
-      })
-      
-      shipmentObj = {
-        shipmentId: shipment.id,
-        productId: product._id,
-        productName: product.name,
-        rates: rateArray
-      }
-    }
-    
-    if (shipmentObj) {
-      order.shipments.push(shipmentObj)
-    }
     order.total = Math.round((total + Number.EPSILON) * 100) / 100
     const savedOrder = await order.save()
 
@@ -166,23 +133,35 @@ exports.list = async (req, res, next) => {
     let orderPastPromise;
 
     if (user.type === 'customer') {
-      //add payment: true
-      orderPendingPromise = await Order.findOne({
+      orderPendingPromise = Order.find({
         customerId: userId, 
-        payment: true, 
-        fulfilled: false
+        payment: {$ne: null}, 
+        fulfilled: null
       })
-      orderPastPromise = await Order.find({
+      .sort({updatedAt: 'asc'})
+      .select('-paymentId -shipments')
+
+      orderPastPromise = Order.find({
         customerId: userId, 
-        payment: true,
-        fulfilled: true
+        payment: {$ne: null},
+        fulfilled: {$ne: null}
       })
+      .sort({updatedAt: 'asc'})
+      .select('-paymentId -shipments')
+
     } else if (user.type === 'admin') {
-      orderPendingPromise = await Order.find({fulfilled: false, payment: true})
-      orderPastPromise = await Order.find({
-        payment: true,
-        fulfilled: true
+      orderPendingPromise = Order.find({
+        fulfilled: null, payment: {$ne: null}
       })
+      .sort({updatedAt: 'asc'})
+      .select('-paymentId')
+
+      orderPastPromise = Order.find({
+        payment: {$ne: null},
+        fulfilled: {$ne: null}
+      })
+      .sort({updatedAt: 'asc'})
+      .select('-paymentId')
     }
 
     const [
@@ -201,3 +180,142 @@ exports.list = async (req, res, next) => {
     next(error)
   }
 }
+
+exports.fulfill = async (req, res, next) => {
+  try {
+    const orderId = req.body.orderId
+    const userId = req.body.userId
+    const user = await User.findById(userId)
+    let orderPendingPromise;
+    let orderPastPromise;
+
+    if (user.type === 'customer') {
+      errorHandler(401, ['Customers are not permitted to modify their orders'])
+    } 
+
+    const order = await Order.findById(orderId)
+
+    if(!order) {
+      errorHandler(404, ['There was an error retrieving your order'])
+    }
+
+    if(!order.shipments[0].postageLabel) {
+      errorHandler(401, ['Postage must be purchased before fulfilling your order'])
+    }
+
+    order.fulfilled = new Date()
+    order.status = 'Delivery in progress'
+    const updatedOrder = await order.save()
+
+    if (!updatedOrder) {
+      errorHandler(500, ['There was a problem updating your order'])
+    }
+
+    orderPendingPromise = Order.find({
+      fulfilled: null, payment: {$ne: null}
+    })
+    .sort({updatedAt: 'asc'})
+    .select('-paymentId')
+
+    orderPastPromise = Order.find({
+      payment: {$ne: null} ,
+      fulfilled: {$ne: null}
+    })
+    .sort({updatedAt: 'asc'})
+    .select('-paymentId')
+    
+    const [
+      orderPast, 
+      orderPending
+    ] = await Promise.all([
+      orderPastPromise, 
+      orderPendingPromise
+    ])
+    
+    res.status(200).json({
+      past: orderPast,
+      pending: orderPending
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.getLabels = async (req, res, next) => {
+  try {
+    const orderId = req.body.orderId
+    const userId = req.body.userId
+    const user = await User.findById(userId)
+    let orderPendingPromise;
+    let orderPastPromise;
+
+    if (user.type === 'customer') {
+      errorHandler(401, ['Customers are not permitted to modify their orders'])
+    } 
+
+    const order = await Order.findById(orderId)
+
+    for (let shipment of order.shipments) {
+      if (shipment.postageLabel) {
+        errorHandler(400, ['Postage labels for order have already been bought'])
+      }
+
+      const retrievedShipment = await postApi.Shipment.retrieve(shipment.shipmentId)
+    
+      if (order.selectLowestRate) {
+        const boughtShipment = await retrievedShipment.buy(shipment.selectLowestRate(['CanadaPost'], ["First"]))
+        
+        if (!boughtShipment.postage_label.label_url) {
+          return errorHandler(500, ['There was a problem creating the shipping label'])
+        }
+
+        shipment.postageLabel = boughtShipment.postage_label.label_url
+      }
+
+      if (!order.selectLowestRate && shipment.selectedRateId) {
+        const boughtShipment = await retrievedShipment.buy(shipment.selectedRateId)
+        
+        if (!boughtShipment.postage_label.label_url) {
+          return errorHandler(500, ['There was a problem creating the shipping label'])
+        }
+
+        shipment.postageLabel = boughtShipment.postage_label.label_url
+      }
+    }
+
+    const updatedOrder = await order.save()
+
+    if (!updatedOrder) {
+      errorHandler(500, ['There was a problem updating your order'])
+    }
+    
+    orderPendingPromise = Order.find({
+      fulfilled: null, payment: {$ne: null}
+    })
+    .sort({updatedAt: 'asc'})
+    .select('-paymentId')
+
+    orderPastPromise = Order.find({
+      payment: {$ne: null},
+      fulfilled: {$ne: null}
+    })
+    .sort({updatedAt: 'asc'})
+    .select('-paymentId')
+    
+    const [
+      orderPast, 
+      orderPending
+    ] = await Promise.all([
+      orderPastPromise, 
+      orderPendingPromise
+    ])
+    
+    res.status(200).json({
+      past: orderPast,
+      pending: orderPending
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+

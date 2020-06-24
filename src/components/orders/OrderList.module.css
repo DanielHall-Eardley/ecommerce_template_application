@@ -1,7 +1,9 @@
 .select {
   display: flex;
-  height: 6vh;
-  border-bottom: var(--bdr-pink);
+  height: 7vh;
+  margin-right: var(--spacing-md);
+  margin-left: var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 .select span {
@@ -10,9 +12,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: var(--bdr-pink);
 }
 
 .selected {
   background-color: var(--pink);
-  color: var(--grey);
+  color: var(--white);
 }

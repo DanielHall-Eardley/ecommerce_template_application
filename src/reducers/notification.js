@@ -6,47 +6,47 @@ import {
 } from '../actions/notification'
 
 const initialState = {
-  error: [],
-  notification: []
+  error: null,
+  notification: null
 }
 
 const notification = (state = initialState, action) => {
   switch (action.type) {
     case DISPLAY_ERROR: 
-      let error = state.error
+      let newError = []
 
       if (Array.isArray(action.error)) {
-        error = action.error 
+        newError = action.error 
       } else {
-        error.push(action.error)
+        newError.push(action.error)
       }
-
+    
       return {
         ...state,
-        error
+        error: newError
       }
     case CLEAR_ERROR: 
       return {
         ...state,
-        error: []
+        error: null
       }
     case DISPLAY_NOTIFICATION: 
-    let notification = state.notification
+    let newNotification = []
       
     if (Array.isArray(action.notification)) {
-      notification = action.notification
+      newNotification = action.notification
     } else {
-      notification.push(action.notification)
+      newNotification.push(action.notification)
     }
 
     return {
       ...state,
-      notification
+      notification: newNotification
     }
   case CLEAR_NOTIFICATION: 
     return {
       ...state,
-      notification: []
+      notification: null
     }
     default: return state
   }

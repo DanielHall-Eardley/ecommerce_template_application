@@ -9,16 +9,26 @@ import {
 } from '../../actions/notification'
 import {useHistory} from 'react-router-dom'
 
+/*This component is responsible for product searching and
+navigating to the add product page*/
 const Search = props => {
   const [query, setQuery] = useState('')
   const navigation = useHistory()
 
-  const navToProductAdd = (nav) => {
-    nav.push('/product/create')
+  const navToProductAdd = () => {
+    navigation.push('/product/create')
   }
 
+  /*This function dispatches a query to the product list in redux state*/
   const searchProducts = () => {
     props.filterProductList(query)
+    navigation.push('/product')
+  }
+
+  /*This function reverts back to the original product list*/
+  const allProducts = () => {
+    props.finishSearch()
+    navigation.push('/product')
   }
 
   return (
@@ -26,12 +36,13 @@ const Search = props => {
       <input 
         className={styles.input}
         type="text" 
+        placeholder="Search for a product"
         value={query} 
         onChange={event => setQuery(event.target.value)}/>
         <button onClick={searchProducts}>
           Search Products
         </button>
-        <button onClick={props.finishSearch} className={styles.btnMargin}>
+        <button onClick={allProducts} className={styles.btnMargin}>
           All Products
         </button>
         {

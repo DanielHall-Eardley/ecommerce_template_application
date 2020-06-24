@@ -1,6 +1,13 @@
 const {Product} = require('../models/product')
 const errorHandler = require('../helper/errorHandler')
 const checkValidationErr = require('../helper/checkValidationErr')
+const aws = require('aws-sdk')
+
+aws.config.update({
+  region: 'ca-central-1',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_KEY
+})
 
 exports.list = async (req, res, next) => {
   try {
@@ -31,10 +38,41 @@ exports.detail = async (req, res, next) => {
   }
 }
 
+exports.s3Signatures = async (req, res, next) => {
+  try {
+    let s3SignatureArray;
+    if(req.body.s3PhotoInfo.length > 0) {
+      const s3PromiseArray = []
+      for (let photo of req.body.s3PhotoInfo) {
+        const fileName = photo.fileName
+        const fileExtension = photo.fileExtension
+        
+        const s3Params = {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: fileName,
+          Expires: 60,
+          ContentType: fileExtension,
+          ACL: 'public-read'
+        }
+
+        const s3 = new aws.S3()
+        const signedUrl = s3.getSignedUrl('putObject', s3Params)
+        s3PromiseArray.push(signedUrl)
+      }
+
+      s3SignatureArray = await Promise.all(s3PromiseArray)
+    }
+
+    res.status(200).json({signatures: s3SignatureArray})
+  } catch (error) {
+    next(error)
+  }
+}
+
 exports.create = async (req, res, next) => {
   try {
     checkValidationErr(req)
-   
+    
     const product = new Product({
       name: req.body.name,
       price: req.body.price,
@@ -56,7 +94,9 @@ exports.create = async (req, res, next) => {
 
     product.save()
     
-    res.status(200).json({product: product})
+    res.status(200).json({
+      product: product,
+    })
   } catch (error) {
     next(error)
   }

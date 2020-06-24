@@ -12,15 +12,18 @@ exports.getCheckoutSummary = async (req, res, next) => {
     const order = await Order.findOne({
       _id: orderId,
       customerId: userId,
-      payment: false,
-      fulfilled: false
+      payment: null,
+      fulfilled: null
     })
 
     if (!order) {
       errorHandler(404, ['Your order could not be retrieved'])
     }
 
-    res.status(200).json(order)
+    res.status(200).json({
+      order: order, 
+      clientSecret: order.paymentIntentSecret
+    })
   } catch (error) {
     
   }
@@ -31,21 +34,11 @@ exports.getPostageRates = async (req, res, next) => {
     const orderId = req.body.orderId
     const userId = req.body.userId
     
-    const to = {
-      verify: ['delivery'],
-      street1: req.body.street,
-      street2: req.body.aptUnit,
-      city: req.body.city,
-      state: req.body.state,
-      country: req.body.country,
-      zip: req.body.zipPostcode
-    }
-    
     const order = await Order.findOne({
       _id: orderId,
       customerId: userId,
-      payment: false,
-      fulfilled: false
+      payment: null,
+      fulfilled: null
     })
     
     if (!order) {
@@ -56,13 +49,30 @@ exports.getPostageRates = async (req, res, next) => {
       errorHandler(401, ["Your address has already been confirmed"])
     }
 
+    const to = {
+      verify: ['delivery'],
+      street1: req.body.street,
+      street2: req.body.aptUnit,
+      city: req.body.city,
+      state: req.body.state,
+      country: req.body.country,
+      zip: req.body.zipPostcode,
+      name: order.customerName,
+      email: order.customerEmail,
+      phone: req.body.phoneNumber
+    }
+
     const from = {
       verify: ['delivery'],
       street1: '3226 Redpath Circle',
       city: 'Mississauga',
       state: 'Ontario',
       country: 'CA',
-      zip: 'L5N8R2'
+      zip: 'L5N8R2',
+      name: 'Daniel Hall-Eardley',
+      email: '350chevy8@gmail.com',
+      company: 'Demo ecommerce website',
+      phone: '6472681072'
     }
 
     const fromAddressPromise = new postApi.Address(from).save()
@@ -115,6 +125,14 @@ exports.getPostageRates = async (req, res, next) => {
         parcel: parcel
       }).save()
 
+      if (shipment.rates.length < 1) {
+        const carrierErrorMessages = shipment.messages.map(message => {
+          return message.message
+        })
+
+        errorHandler(404, carrierErrorMessages)
+      }
+
       const rateArray = shipment.rates.map(rate => {
         return {
           rateId: rate.id,
@@ -137,6 +155,7 @@ exports.getPostageRates = async (req, res, next) => {
     }
 
     order.addressConfirmed = true
+    order.clientPhoneNumber = req.body.phoneNumber
     order.shipments = shipmentArray
     const savedOrder = await order.save()
     res.status(200).json(savedOrder)
@@ -154,8 +173,8 @@ exports.confirmPostageRates = async (req, res, next) => {
     const order = await Order.findOne({
       _id: orderId,
       customerId: userId,
-      payment: false,
-      fulfilled: false
+      payment: null,
+      fulfilled: null
     })
     
     if (!order) {
@@ -169,25 +188,18 @@ exports.confirmPostageRates = async (req, res, next) => {
     let postageTotal = 0
     let updatedShipments
     if (!selectedRates) {
-      updatedShipments = order.shipments.map(shipment => {
+      order.shipments.forEach(shipment => {
         let lowestRate = shipment.rates[0].fee
-        let rateIndex = 0
 
         for (let i = 1; i < shipment.rates.length; i++) {
           if (shipment.rates[i].fee < lowestRate) {
             lowestRate = shipment.rates[i].fee
-            rateIndex = i
           }
         }
 
         postageTotal += lowestRate
-        return {
-          rates: shipment.rates,
-          shipmentId: shipment.shipmentId,
-          productId: shipment.productId,
-          productName: shipment.productName,
-          selectedRateId: shipment.rates[rateIndex].rateId
-        }
+        updatedShipments = order.shipments
+        order.selectLowestRate = true
       })
     } else {
       updatedShipments = order.shipments.map(shipment => {
@@ -221,7 +233,7 @@ exports.confirmPostageRates = async (req, res, next) => {
 
     const paymentIntent = await generatePaymentIntent(order.total, 'cad', stripe)
     order.paymentId = paymentIntent.id
-
+    order.paymentIntentSecret = paymentIntent.client_secret
     const savedOrder = await order.save()
   
     res.status(200).json({
@@ -242,8 +254,8 @@ exports.removeProduct = async (req, res, next) => {
     const order = await Order.findOne({
       _id: orderId,
       customerId: userId, 
-      payment: false,
-      fulfilled: false
+      payment: null,
+      fulfilled: null
     })
 
     if (!order) {
@@ -282,6 +294,7 @@ exports.removeProduct = async (req, res, next) => {
     order.shipments = shipmentArray
     order.products = productArray
     order.total = Math.round((total + Number.EPSILON) * 100) / 100
+
     const savedOrder = await order.save()
 
     if(!savedOrder) {
@@ -289,6 +302,54 @@ exports.removeProduct = async (req, res, next) => {
     }
 
     res.status(200).json(savedOrder)
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.confirmPayment = async (req, res, next) => {
+  try {
+    const clientSecret = req.body.clientSecret
+    const paymentId = req.body.paymentId
+    const orderId = req.body.orderId
+    
+    const order = await Order.findOne({
+      _id: orderId,
+      paymentId: paymentId,
+      paymentIntentSecret: clientSecret,
+    })
+    
+    if (!order) {
+      errorHandler(404, ['Unable to retrieve your order'])
+    }
+
+    if (order.payment) {
+      errorHandler(500, ['This order has already been payed'])
+    }
+
+    order.status = 'Awaiting fulfilment'
+    order.payment = new Date()
+    order.paymentIntentSecret = null
+    order.save()
+
+    res.status(200).json({msg: 'Payment confirmed'})
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.cancelOrder = async (req, res, next) => {
+  try {
+    const orderId = req.body.orderId
+    const userId = req.body.userId
+
+    const deletedOrder = await Order.findOneAndDelete({ _id: orderId, customerId: userId})
+
+    if (!deletedOrder) {
+      errorHandler(500, ['There was a problem deleting your order'])
+    }
+
+    res.status(200).json({msg: 'Order removed'})
   } catch (error) {
     next(error)
   }

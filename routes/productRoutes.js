@@ -29,6 +29,8 @@ router.put(
   productController.update
 )
 
+router.post('/s3-signatures', isAuth, productController.s3Signatures)
+
 router.delete('/delete/:id', isAuth, productController.delete)
 
 module.exports = router

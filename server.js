@@ -1,8 +1,8 @@
 const express = require('express')
 const app = express()
 const path = require('path')
-
 const env = require('dotenv')
+const mongoose = require('mongoose')
 
 if (process.env.USERNAME === 'daniel') {
   const result = env.config({path: __dirname + '/.env'})
@@ -10,8 +10,6 @@ if (process.env.USERNAME === 'daniel') {
     throw result.error
   }
 }
-
-const mongoose = require('mongoose')
 
 const adminRoutes = require('./routes/adminRoutes')
 const checkoutRoutes = require('./routes/checkoutRoutes')

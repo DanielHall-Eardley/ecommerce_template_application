@@ -55,6 +55,7 @@
 
 .address button {
   width: 14rem;
+  grid-row: 5 / 6;
 }
 
 .selectPostage, .addressConfirmed {
@@ -130,6 +131,10 @@
 
 .payment button {
   margin-top: var(--spacing-sm);
+}
+
+.payment button:last-child {
+  margin-left: var(--spacing-sm);
 }
 
 .fallBack {

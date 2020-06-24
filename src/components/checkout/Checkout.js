@@ -19,10 +19,11 @@ import {
   displayNotification,
   clearNotification
 } from '../../actions/notification'
-import {storeOrder} from '../../actions/order'
+import {storeOrder, clearOrder} from '../../actions/order'
 import {storeUser, clearUser} from '../../actions/user'
 
 import checkLogin from '../../helper/checkLogin'
+import Loading from './Loading'
 
 const cardElementOptions = {
   style: {
@@ -44,14 +45,17 @@ const cardElementOptions = {
 
 const Checkout = (props) => {
   const [clientSecret, setSecret] = useState(null)
-  const [loading, setLoading] = useState(false)
   const [street, setStreet] = useState('')
   const [aptUnit, setAptUnit] = useState('')
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
   const [country, setCountry] = useState('')
   const [zipPostcode, setZipPostcode] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [selectedRates, setRates] = useState([])
+
+  const [loading, setLoading] = useState(false)
+  const [loadingMsg, setLoadingMsg] = useState('')
 
   const stripe = useStripe()
   const elements = useElements()
@@ -80,7 +84,8 @@ const Checkout = (props) => {
         props.displayError(response.error)
       }
   
-      props.storeOrder(response)
+      props.storeOrder(response.order)
+      setSecret(response.clientSecret)
     }
     
     const headers = {
@@ -93,16 +98,17 @@ const Checkout = (props) => {
     }
   }, [props.user.token, props.orderId])
 
-  const handlePayment = async (event, clientName) => {
+  const handlePayment = async (event, clientName, token, orderId) => {
     event.preventDefault()
     props.clearError()
     props.clearNotification()
     setLoading(true)
+    setLoadingMsg('Processing your payment, please do not navigate away from this page')
 
     if (!stripe || !elements) {
       return setLoading(false)
     }
-    console.log(clientSecret)
+    
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
         card: elements.getElement(CardElement),
@@ -111,17 +117,34 @@ const Checkout = (props) => {
         }
       }
     })
-
+    
     if (result.error) {
-      return props.displayError([result.error])
+      setLoading(false)
+      return props.displayError(result.error.message)
     }
 
     if (result.paymentIntent.status === "succeeded") {
-      console.log(result)
-      props.displayNotification(['Payment confirmed'])
-      navigate.push('/product')
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      }
+  
+      const body = JSON.stringify({
+        paymentId: result.paymentIntent.id,
+        clientSecret: result.paymentIntent.client_secret,
+        orderId: orderId
+      })
+      
+      const response = await api('/checkout/confirm/payment', body, headers, 'PUT')
+  
+      if (response.error) {
+        setLoading(false)
+        return displayError(response.error)
+      }
+
       setLoading(false)
-    }
+      navigate.push('/order')
+    }  
   }
 
   const removeProduct = async (productId, token, userId, orderId) => {
@@ -174,6 +197,7 @@ const Checkout = (props) => {
     event.preventDefault()
     props.clearError()
     setLoading(true)
+    setLoadingMsg('Checking delivery address')
     
     const headers = {
       'Content-Type': 'application/json',
@@ -188,7 +212,8 @@ const Checkout = (props) => {
       city,
       state,
       country,
-      zipPostcode
+      zipPostcode,
+      phoneNumber
     })
     
     const response = await api('/checkout/postage-rates', body, headers, 'POST')
@@ -200,6 +225,7 @@ const Checkout = (props) => {
 
     props.storeOrder(response)
     setLoading(false)
+    setLoadingMsg('')
   }
 
   const renderPostageRates = (rates, shipmentId) => {
@@ -259,10 +285,36 @@ const Checkout = (props) => {
     return shipmentArray
   }
 
+  const cancelOrder = async (event, orderId, userId, token) => {
+    event.preventDefault()
+    props.clearError()
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': token
+    }
+
+    const body = JSON.stringify({
+      userId: userId,
+      orderId: orderId,
+    })
+    
+    const response = await api('/checkout/cancel-order', body, headers, 'DELETE')
+    
+    if (response.error) {
+      return props.displayError(response.error)
+    }
+
+    props.displayNotification(response.msg)
+    props.clearOrder()
+    navigate.push('/')
+  }
+
   const confirmPostageRates = async (event, setLowestRates) => {
     event.preventDefault()
     props.clearError()
     setLoading(true)
+    setLoadingMsg('Confirming Postage Options')
 
     let rates = selectedRates
 
@@ -287,10 +339,11 @@ const Checkout = (props) => {
       setLoading(false)
       return displayError(response.error)
     }
-    console.log(response)
+    
     props.storeOrder(response.order)
     setSecret(response.clientSecret)
     setLoading(false)
+    setLoadingMsg('')
   }
 
   const renderPostageOptions = (order, loading) => {
@@ -332,6 +385,7 @@ const Checkout = (props) => {
 
   return (
     <main>
+      { loading ? <Loading msg={loadingMsg}/> : null}
       { props.order ? 
         <div className={styles.checkout} key={order._id}>
           <h3 className={styles.header}>
@@ -403,6 +457,13 @@ const Checkout = (props) => {
                   value={zipPostcode}
                   onChange={(event) => setZipPostcode(event.target.value)}/>
               </div>
+              <div>
+                <label htmlFor="">Phone Number</label>
+                <input 
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(event) => setPhoneNumber(event.target.value)}/>
+              </div>
               <button 
                 className={loading ? 'disabled': null} 
                 onClick={getPostageRates}
@@ -429,7 +490,7 @@ const Checkout = (props) => {
           </div>
           <h3 className={styles.header}>Complete Payment</h3>
           <form 
-            onSubmit={(event) => handlePayment(event, order.customerName)} 
+            onSubmit={(event) => handlePayment(event, order.customerName, props.user.token, order._id)} 
             className={styles.payment}>
             <CardElement options={cardElementOptions} />
             <button className={
@@ -438,6 +499,9 @@ const Checkout = (props) => {
               } 
               disabled={loading || !order.postageConfirmed}>
               Confirm Payment
+            </button>
+            <button onClick={(event) => cancelOrder(event, order._id, order.customerId, props.user.token)}>
+              Cancel Order
             </button>
           </form>
         </div> 
@@ -461,6 +525,7 @@ const mapDispatchToProps = dispatch => {
     storeUser: order => dispatch(storeUser(order)),
     clearError: () => dispatch(clearError()),
     clearUser: () => dispatch(clearUser()),
+    clearOrder: () => dispatch(clearOrder()),
     displayNotification: notfication => dispatch(displayNotification(notfication)),
     clearNotification: () => dispatch(clearNotification()),
   }

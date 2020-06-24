@@ -1,19 +1,28 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import styles from './Notification.module.css'
 
 export default props => {
-  const errorArray = props.error.map(error => {
-    return <p className={styles.error} key={error}>{error}</p>
-  })
 
-  const notificationArray = props.notification.map(notification => {
-    return <p className={styles.notification} key={notification}>{notification}</p>
-  })
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    })
+  }, [props.error, props.notification])
+
+  const notificationArray = (arrayOrNull, notificationType) => {
+    if (arrayOrNull) {
+      return arrayOrNull.map(error => {
+        return <p className={styles[notificationType]} key={error}>{error}</p>
+      })
+    }
+  }
 
   return (
     <h3>
-      {errorArray}
-      {notificationArray}
+      {notificationArray(props.error, 'error')}
+      {notificationArray(props.notification, 'notification')}
     </h3>
   )
 }

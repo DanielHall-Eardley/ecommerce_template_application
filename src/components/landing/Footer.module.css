@@ -12,5 +12,14 @@
 
 .links li, .copyright{
   color: var(--brown);
+}
 
+@media screen and (max-width: 600px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .links {
+    margin-bottom: var(--spacing-sm)
+  }
 }

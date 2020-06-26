@@ -14,27 +14,32 @@ import api from '../../helper/api'
 import sprite from '../../sprite.svg'
 
 /*This component shows the details for a selected
-product and allows said product to be added to the cart*/
+product and allows product to be added to the cart*/
 const ProductDetail = props => {
   const [selectedImage, setImage] = useState(0)
   const productId = useParams().id
 
-  const specificationList = (specs) => {
-    if (!specs) {
-      return
+  /*This function makes a request to the api to
+  get the product details and stores them in redux state*/
+  useEffect(() => {
+    clearError()
+
+    const getProduct= async () => {
+      const res = await fetch(apiHost + '/product/detail/' + productId)
+      const response = await res.json()
+
+      if (response.error) {
+        return displayError(response.error)
+      }
+    
+      props.storeProduct(response.product) 
     }
 
-    const specList = specs.map(spec => {
-      return (
-        <li className={styles.listItem} key={spec.name}>
-          <span>{spec.name}</span> {spec.content}
-        </li>
-      )
-    })
-    
-    return specList
-  }
+    getProduct()
+  }, [])
 
+  /*This function changes what photo is displayed by
+  incrementing or decrementing the index of the photoArray*/
   const changePhoto = (direction, end) => {
     const start = 0
 
@@ -53,11 +58,10 @@ const ProductDetail = props => {
 
       setImage(selectedImage - 1)
     }
-
-    console.log(selectedImage)
   }
 
-  /*This function either*/
+  /*This function will create an order and add the selected product to it. 
+  If a current order already exists it will update it with the selected product */
   const addToCart = async (productId, userId, token) => {
     props.clearError()
    
@@ -94,24 +98,22 @@ const ProductDetail = props => {
     props.storeOrderSummary(response)
   }
   
-  /*This function makes a request to the api to
-  get the product details and stores them in redux state*/
-  useEffect(() => {
-    clearError()
-
-    const getProduct= async () => {
-      const res = await fetch(apiHost + '/product/detail/' + productId)
-      const response = await res.json()
-
-      if (response.error) {
-        return displayError(response.error)
-      }
-    
-      props.storeProduct(response.product) 
+  /*Conditionally render a list of product specifications*/
+  const specificationList = (specs) => {
+    if (!specs) {
+      return
     }
 
-    getProduct()
-  }, [])
+    const specList = specs.map(spec => {
+      return (
+        <li className={styles.listItem} key={spec.name}>
+          <span>{spec.name}</span> {spec.content}
+        </li>
+      )
+    })
+    
+    return specList
+  }
 
   const {
     name, 

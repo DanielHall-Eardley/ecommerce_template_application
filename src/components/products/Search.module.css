@@ -14,7 +14,7 @@
   flex: 1;
   margin-right: var(--spacing-sm);
   height: 6vh;
-  font-size: var(--font-md);
+  font-size: var(--font-sm);
 }
 
 .btnMargin {

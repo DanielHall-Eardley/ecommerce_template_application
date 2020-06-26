@@ -68,3 +68,40 @@
 .recipient span:not(:last-child) {
   margin-right: var(--spacing-lg);
 }
+
+@media screen and (max-width: 650px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header span:not(:last-child) {
+    margin-bottom: .8rem;
+  }
+
+  .productItem {
+    flex-wrap: wrap;
+  }
+
+  .productItem *:not(:last-child) {
+    margin-bottom: .8rem;
+  }
+
+  .productItem a {
+    margin-right: 0;
+  }
+
+  .productItem span:last-child {
+    margin-right: 0;
+  }
+
+  .footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .footer button {
+    width: 100%;
+  }
+}

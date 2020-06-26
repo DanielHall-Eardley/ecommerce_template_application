@@ -4,6 +4,7 @@ const stripe = require('../helper/stripe')
 const errorHandler = require('../helper/errorHandler')
 const postApi = require('../helper/postApi')
 
+//This function is not yet in use.
 exports.stripe = async (req, res,  next) => {
   const sig = req.headers['stripe-signature'];
   let paymentEvent;

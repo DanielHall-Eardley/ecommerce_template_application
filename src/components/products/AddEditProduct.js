@@ -18,6 +18,9 @@ import {uuid} from 'uuidv4'
 
 import Photos from './Photos'
 
+
+/*This component is responsible for creating, updating
+products and uploading product images*/
 const AddEditProduct = props => {
   const location = useLocation()
   const {id} = useParams()
@@ -33,6 +36,9 @@ const AddEditProduct = props => {
   let oldPhotoArray = [] 
   let oldSpecifications = []
 
+  /*If this component is reached via 'product/update'
+  the product is retrieved from the database and updatable 
+  fields in the form are populated with existing product values*/
   if (path === 'update') {
     setTitle('Update Product')
     props.clearError()
@@ -79,30 +85,39 @@ const AddEditProduct = props => {
   const [height, setHeight] = useState('')
   const [length, setLength] = useState('')
 
+
   const removeSpec = (name) => {
     const filteredArray = specificationArray.filter(spec => spec.name !== name)
     setSpecification(filteredArray)
   }
   
+  /*This shows a preview list of all the added product specifications*/
   const specificationList = specificationArray.map(spec => {
     return (
       <li className={styles.listItem} key={spec.name}>
         <b>{spec.name}</b>: {spec.content}
-        <button 
+        <span
           onClick={() => removeSpec(spec.name)}
           className='default-link'>
           Remove
-        </button>
+        </span>
       </li>
     )
   })
 
+
+  /*Check the filename of image to uploaded for special characters*/
   const checkFileName = fileName => {
     const regex = /[_!@#$%^?*&`~\/\\:"'|;\[\]\{\}=+<>]/gm
     const checkForSpecialChar = fileName.match(regex)
     return checkForSpecialChar
   }
 
+
+  /*This function submits an array of objects to the server, 
+  each object contains a file name and file type for an individual image.
+  The server uses this information to create a signed url for S3 upload
+  on the client side*/
   const uploadPhotos = async (event) => {
     event.preventDefault()
     props.clearError()
@@ -112,6 +127,9 @@ const AddEditProduct = props => {
     }
 
     const s3PhotoInfo = []
+
+    /*This is important to ensure consistent destructuring of the
+    signed url when it returns from the server*/
     for (let file of photoFileArray) {
       if (checkFileName(file.name)) {
         return props.displayError('Only "-" "." special characters are allowed are allowed in file names')
@@ -120,7 +138,7 @@ const AddEditProduct = props => {
       const s3FileUpload = {
         fileName: `${file.name}_${uuid()}`,
         fileExtension: file.type
-    }
+      }
 
       s3PhotoInfo.push(s3FileUpload)
     }
@@ -138,9 +156,22 @@ const AddEditProduct = props => {
       return props.displayError(response.error)
     }
 
+    savePhotosToS3(response.signatures)
+  }
+
+
+  /*This function uses the signed url to complete the image
+  upload to S3*/
+  const savePhotosToS3 = async signatureArray => {
     const photoUrlArray = []
-    for (let url of response.signatures) {
+    for (let url of signatureArray) {
+
+      /*Extract the base url from all the query parameters,
+      so it can be saved to the database and referenced to access image*/
       const urlToSave = url.split('?')[0]
+
+      /*Extract base file name to find the correct file on the 
+      client side to upload with signed url*/
       const rawFileName = urlToSave.split('_')[0].split('.com/')[1]
       const file = photoFileArray.find(file => file.name === rawFileName)
 
@@ -148,6 +179,7 @@ const AddEditProduct = props => {
         return props.displayError('There was a problem uploading your images')
       } 
 
+      //upload image
       const uploadResult = await fetch(url, {
         headers : {
           'Content-Type': file.type,
@@ -159,12 +191,19 @@ const AddEditProduct = props => {
       if (uploadResult.status !== 200) {
         return props.displayError('There was a problem uploading your images')
       }
+
+      //Store photo url after successful upload
       photoUrlArray.push(urlToSave)
     }
 
+    /*Add array of photo urls to local state to be
+    stored with product update or creation*/
     setPhotoUrlArray(photoUrlArray)
   }
 
+
+  /*Update or create product depending on the navigation 
+  path used to access page*/
   const saveProduct = async (event) => {
     event.preventDefault()
     props.clearError()
@@ -201,6 +240,7 @@ const AddEditProduct = props => {
     navigate.push('/product/detail/' + response.product._id)
   }
 
+  
   const addSpecification = () => {
     inputSpecification({
       name: "",
@@ -280,44 +320,42 @@ const AddEditProduct = props => {
           {specificationList}
         </ul>
         { path === 'create' ? (
-          <div>
-            <div className={styles.dimensions}>
-              <div>
-                <label>Enter Product Weight in ounces</label>
-                <input 
-                  className={styles.input}
-                  step='any'
-                  type="number" 
-                  value={weight} 
-                  onChange={event => setWeight(event.target.value)} />
-              </div>
-              <div>
-                <label>Enter Product Length in inches</label>
-                <input 
-                  className={styles.input}
-                  step='any'
-                  type="number" 
-                  value={length} 
-                  onChange={event => setLength(event.target.value)} />
-              </div>
-              <div>
-                <label>Enter Product Width in inches</label>
-                <input 
-                  className={styles.input}
-                  step='any'
-                  type="number" 
-                  value={width}
-                  onChange={event => setWidth(event.target.value)} />
-              </div>
-              <div>
-                <label>Enter Product Height in inches</label>
-                <input 
-                  className={styles.input}
-                  step='any'
-                  type="number" 
-                  value={height} 
-                  onChange={event => setHeight(event.target.value)} />
-              </div>
+          <div className={styles.dimensions}>
+            <div>
+              <label>Enter Product Weight in ounces</label>
+              <input 
+                className={styles.input}
+                step='any'
+                type="number" 
+                value={weight} 
+                onChange={event => setWeight(event.target.value)} />
+            </div>
+            <div>
+              <label>Enter Product Length in inches</label>
+              <input 
+                className={styles.input}
+                step='any'
+                type="number" 
+                value={length} 
+                onChange={event => setLength(event.target.value)} />
+            </div>
+            <div>
+              <label>Enter Product Width in inches</label>
+              <input 
+                className={styles.input}
+                step='any'
+                type="number" 
+                value={width}
+                onChange={event => setWidth(event.target.value)} />
+            </div>
+            <div>
+              <label>Enter Product Height in inches</label>
+              <input 
+                className={styles.input}
+                step='any'
+                type="number" 
+                value={height} 
+                onChange={event => setHeight(event.target.value)} />
             </div>
           </div>
         ) : null}  

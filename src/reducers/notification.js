@@ -10,6 +10,8 @@ const initialState = {
   notification: null
 }
 
+/*The display reducers are set up receive a string or
+an array and return an array of strings*/
 const notification = (state = initialState, action) => {
   switch (action.type) {
     case DISPLAY_ERROR: 

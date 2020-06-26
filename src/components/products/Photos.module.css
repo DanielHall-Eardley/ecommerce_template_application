@@ -1,15 +1,26 @@
 .container {
   margin-bottom: var(--spacing-md);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
-.upload{
-  display: inline-block;
-  padding-top: .8rem;
+.container button {
+  width: max-content;
+  justify-self: end;
+}
+
+.upload {
   margin-bottom: 0;
   margin-right: var(--spacing-sm);
+  font-size: var(--font-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
 }
 
 .photoPreview {
+  grid-column: 1 / -1;
   margin: var(--spacing-sm) 0;
   display: grid;
   grid-auto-rows: 20rem;
@@ -38,4 +49,10 @@
 
 .photo img:hover + label {
   opacity: 1;
+}
+
+@media screen and (max-width: 600px) {
+  .upload, .container button {
+    width: 97.5%;
+  }
 }

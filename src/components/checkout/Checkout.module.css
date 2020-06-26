@@ -54,7 +54,7 @@
 }
 
 .address button {
-  width: 14rem;
+  width: 125px;
   grid-row: 5 / 6;
 }
 
@@ -144,4 +144,43 @@
   background-color: var(--blue);
   color: var(--grey);
   font-size: var(--font-md);
+}
+
+@media screen and (max-width: 850px) {
+  .checkout {
+    margin: var(--spacing-md);
+  }
+
+}
+
+@media screen and (max-width: 550px) {
+  .productItem, 
+  .summary, 
+  .rateList li,
+  .confirmPostage {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .productItem *, .summary span {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .productItem *:not(:last-child), 
+  .summary span:not(:last-child),
+  .rateList li > span,
+  .confirmPostage *:not(:last-child) {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .carrierAndFee {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .address button {
+    grid-row: 8 / 9;
+  }
 }

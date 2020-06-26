@@ -19,6 +19,33 @@ import List from './List'
 const ProductDetail = props => {
   const [selectedOrderList, setList] = useState('pending')
 
+  //Retrieve orders from database
+  const getOrderList = async (userId, token) => {
+    const res = await fetch(`${apiHost}/order/list/${userId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      }
+    })
+
+    const response = await res.json()
+
+    if (response.error) {
+      return props.displayError(response.error)
+    }
+
+    if (
+      response.past.length < 1 
+      && (!response.pending || response.pending.length < 1)
+      ) {
+      return props.displayNotification('No orders found')
+    }
+    
+    props.storeOrderList(response.past, response.pending)
+  }
+
+  
+  /*If user is logged in, get all orders relevent to user*/
   useEffect(() => {
     props.clearNotification()
     props.clearError()
@@ -32,37 +59,15 @@ const ProductDetail = props => {
     
     props.storeUser(result.user)
 
-    const getOrderList = async (userId, token) => {
-      
-      const res = await fetch(`${apiHost}/order/list/${userId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        }
-      })
-
-      const response = await res.json()
-
-      if (response.error) {
-        return props.displayError(response.error)
-      }
-
-      if (
-        response.past.length < 1 
-        && (!response.pending || response.pending.length < 1)
-        ) {
-        return props.displayNotification('No orders found')
-      }
-      
-      props.storeOrderList(response.past, response.pending)
-    }
-    
     if (props.user.token) {
       getOrderList(props.user.userId, props.user.token)
     }
   }, [props.user.token]) 
 
-  const getlabels = async (orderId) => {
+
+  /*Buy the postage labels based on the postage rate
+  options the customer has selected*/
+  const buyLabels = async (orderId) => {
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': props.user.token
@@ -82,6 +87,8 @@ const ProductDetail = props => {
     props.storeOrderList(response.past, response.pending)
   }
 
+  
+  /*Submit a api request to mark the order as fulfilled*/
   const fulfillOrder = async (orderId) => {
     const headers = {
       'Content-Type': 'application/json',
@@ -102,6 +109,9 @@ const ProductDetail = props => {
     props.storeOrderList(response.past, response.pending)
   }
 
+
+  /*Orders are sorted into 'pending' which are orders that have been
+  payed for but not sent and 'fufilled', orders that have been sent*/
   return (
     <section>
       <div className={styles.select}>
@@ -126,7 +136,7 @@ const ProductDetail = props => {
         orderList={props[selectedOrderList + 'OrderList']} 
         userType={props.user.type}
         fulfillOrder={fulfillOrder}
-        getlabels={getlabels}/>
+        buyLabels={buyLabels}/>
     </section>
   )
 }

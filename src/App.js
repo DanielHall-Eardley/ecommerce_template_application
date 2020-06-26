@@ -28,7 +28,26 @@ import checkLogin from './helper/checkLogin'
 import {stripeApiKey} from './global'
 const stripePromise = loadStripe(stripeApiKey)
 
+/*This component functions as a root level navigator
+and retrieves user specific information on the 
+application's initial load*/
 const App = props => {
+  const getOrderSummary = async (userId, token) => {
+    const res = await fetch(apiHost + '/order/summary/' + userId, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      }
+    }, [])
+
+    const response = await res.json()
+
+    if (!response.error) {
+      props.storeOrderSummary(response)
+    }
+  }
+
+  
   useEffect(() => {
     props.clearError()
     
@@ -40,23 +59,6 @@ const App = props => {
     
     props.storeUser(result.user)
   
-    const getOrderSummary = async (userId, token) => {
-      const res = await fetch(apiHost + '/order/summary/' + userId, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        }
-      }, [])
-
-      const response = await res.json()
-
-      if (response.error) {
-        return
-      }
-
-      props.storeOrderSummary(response)
-    }
-
     if (result.user.type === 'customer') {
       getOrderSummary(result.user.userId, result.user.token)
     }

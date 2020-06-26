@@ -40,6 +40,12 @@ html {
   font-size: 62.25%;
 }
 
+@media screen and (max-width: 850px) {
+  html {
+    font-size: 54%;
+  }
+}
+
 @media screen and (max-width: 650px) {
   html {
     font-size: 48%;
@@ -96,7 +102,7 @@ default-link:active, a:active{
 input, select {
   border-radius: var(--bdr-rad);
   border: var(--bdr-light);
-  height: 3rem;
+  height: 3.5rem;
   outline: none;
   padding-left: var(--spacing-sm);
   background-color: transparent;
@@ -108,7 +114,7 @@ input:focus {
 
 .primary-btn, button {
   padding: 0 var(--spacing-sm);
-  height: 3rem;
+  height: 3.5rem;
   border: none;
   border-radius: var(--bdr-rad);
   outline: none;

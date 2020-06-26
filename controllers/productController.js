@@ -3,12 +3,14 @@ const errorHandler = require('../helper/errorHandler')
 const checkValidationErr = require('../helper/checkValidationErr')
 const aws = require('aws-sdk')
 
+//configure aws sdk
 aws.config.update({
   region: 'ca-central-1',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_KEY
 })
 
+//retrieve all products
 exports.list = async (req, res, next) => {
   try {
     const productList = await Product.find()
@@ -23,6 +25,7 @@ exports.list = async (req, res, next) => {
   }
 }
 
+//retrieve the details of one products
 exports.detail = async (req, res, next) => {
   try {
     const id = req.params.id
@@ -38,10 +41,15 @@ exports.detail = async (req, res, next) => {
   }
 }
 
+/*This function makes a request via the aws sdk
+to get a signed url for each image so that 
+it can be uploaded on the client side*/
 exports.s3Signatures = async (req, res, next) => {
   try {
     let s3SignatureArray;
     if(req.body.s3PhotoInfo.length > 0) {
+
+      //Create an array of promises
       const s3PromiseArray = []
       for (let photo of req.body.s3PhotoInfo) {
         const fileName = photo.fileName
@@ -60,6 +68,7 @@ exports.s3Signatures = async (req, res, next) => {
         s3PromiseArray.push(signedUrl)
       }
 
+      //Resolve all promises concurrently
       s3SignatureArray = await Promise.all(s3PromiseArray)
     }
 
@@ -84,8 +93,6 @@ exports.create = async (req, res, next) => {
       height: req.body.height,
       length: req.body.length,
       width: req.body.width,
-      weightUnit: req.body.weightUnit,
-      measurementUnit: req.body.measurementUnit,
     })
 
     if (!product) {
@@ -106,6 +113,28 @@ exports.update = async (req, res, next) => {
   try {
     checkValidationErr(req)
     
+    const productId = req.body.productId
+    const product = await Product.findById(productId)
+    
+    if (!product) {
+      errorHandler(500, ['Unable to find product'])
+    }
+
+    product.name = req.body.name
+    product.price = req.body.price
+    product.specialPrice = req.body.specialPrice
+    product.description = req.body.description
+    product.photoArray = req.body.photoArray
+    product.specifications = req.body.specificationArray
+  
+    const savedProduct = await product.save()
+    if (!savedProduct) {
+      errorHandler(500, ['Unable to create your product'])
+    }
+    
+    res.status(200).json({
+      product: savedProduct,
+    })
   } catch (error) {
     next(error)
   }
@@ -113,7 +142,14 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
   try {
-    
+    const productId = req.params.id
+    const product = Product.findByIdAndDelete(productId)
+
+    if (!product) {
+      errorHandler('There was a problem deleting the product')
+    }
+
+    res.status(200).json({msg: 'Product deleted!'})
   } catch (error) {
     next(error)
   }

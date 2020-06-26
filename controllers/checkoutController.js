@@ -4,6 +4,7 @@ const postApi = require('../helper/postApi')
 const Order = require('../models/order')
 const errorHandler = require('../helper/errorHandler')
 
+//Retrieve current order
 exports.getCheckoutSummary = async (req, res, next) => {
   try {
     const orderId = req.params.orderId
@@ -29,6 +30,8 @@ exports.getCheckoutSummary = async (req, res, next) => {
   }
 }
 
+/*Confirm the customer's address and generate postage rates
+for all products using the Easy Post api*/
 exports.getPostageRates = async (req, res, next) => {
   try {
     const orderId = req.body.orderId
@@ -164,6 +167,9 @@ exports.getPostageRates = async (req, res, next) => {
   }
 }
 
+/*Confirm the selected postage rates, calculate the total postage
+add it to the product total and create a Stripe payment intent
+in preparation for payment*/
 exports.confirmPostageRates = async (req, res, next) => {
   try {
     const orderId = req.body.orderId
@@ -185,12 +191,14 @@ exports.confirmPostageRates = async (req, res, next) => {
       errorHandler(401, ['Postage options have already been confirmed'])
     }
 
+    //Save postage rate selections to database and calculate total
     let postageTotal = 0
     let updatedShipments
     if (!selectedRates) {
       order.shipments.forEach(shipment => {
         let lowestRate = shipment.rates[0].fee
 
+        //Find cheapest postage for individual product
         for (let i = 1; i < shipment.rates.length; i++) {
           if (shipment.rates[i].fee < lowestRate) {
             lowestRate = shipment.rates[i].fee
@@ -202,6 +210,7 @@ exports.confirmPostageRates = async (req, res, next) => {
         order.selectLowestRate = true
       })
     } else {
+      //Find the correct shipment and postage rate from database
       updatedShipments = order.shipments.map(shipment => {
         const selectedRate = selectedRates.find(obj => { 
           return obj.shipmentId.toString() === shipment.shipmentId.toString()
@@ -231,6 +240,7 @@ exports.confirmPostageRates = async (req, res, next) => {
     order.postageTotal = Math.round((postageTotal + Number.EPSILON) * 100) / 100
     order.total = Math.round(((order.postageTotal + order.total) + Number.EPSILON) * 100) / 100
 
+    //Generate Stripe payment intent and save the neccessary details to database
     const paymentIntent = await generatePaymentIntent(order.total, 'cad', stripe)
     order.paymentId = paymentIntent.id
     order.paymentIntentSecret = paymentIntent.client_secret
@@ -245,6 +255,7 @@ exports.confirmPostageRates = async (req, res, next) => {
   }
 }
 
+/*Remove a product from the order and re-calculate the order total*/
 exports.removeProduct = async (req, res, next) => {
   try {
     const orderId = req.body.orderId
@@ -307,6 +318,7 @@ exports.removeProduct = async (req, res, next) => {
   }
 }
 
+/*Mark the order as payed for*/
 exports.confirmPayment = async (req, res, next) => {
   try {
     const clientSecret = req.body.clientSecret

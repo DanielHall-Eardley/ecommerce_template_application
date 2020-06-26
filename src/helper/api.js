@@ -1,5 +1,6 @@
 import {apiHost} from '../global'
 
+/*This function is used to make api requests*/
 export default async (url, body, headers, method) => {
   try {
     const response = await fetch(apiHost + url, {

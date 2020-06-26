@@ -3,12 +3,18 @@ import styles from './List.module.css'
 import '../../Global.css'
 import {format} from 'date-fns'
 
-export default ({orderList, userType, fulfillOrder, getlabels}) => {
+export default ({orderList, userType, fulfillOrder, buyLabels}) => {
   let orderArray = orderList
+
+  /*This needed because in some instances the server
+  will return a single object instead of an array of objects*/
   if (!Array.isArray(orderList)) {
     orderArray = [orderArray]
   }
 
+  /*This component renders a shipment list for a business 
+  admin user and a product list for a customer user. Only the
+  shipment list contains the links to print the postage labels*/
   const productOrShipmentList = (order, userType) => {
     if (userType === 'admin' && !order.fulfilled) {
       return order.shipments.map(shipment => {
@@ -35,6 +41,10 @@ export default ({orderList, userType, fulfillOrder, getlabels}) => {
     }
   }
   
+  
+  /*Renders a list of orders. Certain functionality and information
+  is only available to the business admin user, such as the ability
+  to purchase postage and mark the order as fulfilled*/
   const renderOrderList = (orders) => {
     return orders.map(order => {
       return (
@@ -76,7 +86,7 @@ export default ({orderList, userType, fulfillOrder, getlabels}) => {
               </button>
             : null }
             { userType === 'admin' && !order.shipments[0].postageLabel ?
-              <button onClick={() => getlabels(order._id)}>
+              <button onClick={() => buyLabels(order._id)}>
                 Buy Shipping Labels
               </button> 
             : null }  

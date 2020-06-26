@@ -25,13 +25,14 @@ import {storeUser, clearUser} from '../../actions/user'
 import checkLogin from '../../helper/checkLogin'
 import Loading from './Loading'
 
+//stripe configuration options
 const cardElementOptions = {
   style: {
     base: {
       color: "#32325d",
       fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
       fontSmoothing: "antialiased",
-      fontSize: "16px",
+      fontSize: "1.3rem",
       "::placeholder": {
         color: "#aab7c4",
       },
@@ -61,6 +62,27 @@ const Checkout = (props) => {
   const elements = useElements()
   const navigate = useHistory()
 
+  
+  /*This function makes a request to the api to retrieve the current order*/
+  const getOrderSummary = async (headers, userId, orderId) => {
+    const res = await fetch(apiHost + `/checkout/summary/${orderId}/${userId}`, {
+      headers
+    })
+
+    const response = await res.json()
+    
+    if (response.error) {
+      props.displayError(response.error)
+    }
+
+    props.storeOrder(response.order)
+    setSecret(response.clientSecret)
+  }
+
+  
+  /*This function checks if a user is logged in. 
+  If a current order exists and the user is of type: customer,
+  the getOrderSummary function is called*/
   useEffect(() => {
     props.clearError()
     
@@ -73,35 +95,27 @@ const Checkout = (props) => {
     
     props.storeUser(result.user)
 
-    const getOrderSummary = async (headers, userId, orderId) => {
-      const res = await fetch(apiHost + `/checkout/summary/${orderId}/${userId}`, {
-        headers
-      })
-
-      const response = await res.json()
-      
-      if (response.error) {
-        props.displayError(response.error)
-      }
-  
-      props.storeOrder(response.order)
-      setSecret(response.clientSecret)
-    }
-    
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': props.user.token
     }
 
-    if(props.user.token && props.orderId) {
+    if(props.user.type === 'customer' && props.orderId) {
       getOrderSummary(headers, props.user.userId, props.orderId)
     }
   }, [props.user.token, props.orderId])
 
+  
+  /*This function handles the processing the payment after
+  the customer has confirmed their card details. If the payment 
+  is successful the order is updated in the database and moved
+  from the checkout to the next stage of processing*/
   const handlePayment = async (event, clientName, token, orderId) => {
     event.preventDefault()
     props.clearError()
     props.clearNotification()
+
+    //Activate a screen overlay to prevent user interaction during processing
     setLoading(true)
     setLoadingMsg('Processing your payment, please do not navigate away from this page')
 
@@ -109,6 +123,10 @@ const Checkout = (props) => {
       return setLoading(false)
     }
     
+    
+    /*Confirm payment using the client secret 
+    which represents a payment that was created when 
+    the postage rates were confirmed*/
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
         card: elements.getElement(CardElement),
@@ -147,6 +165,10 @@ const Checkout = (props) => {
     }  
   }
 
+  
+  /*This function removes the selected product from the order
+  in the database and sends the updated order in the response,
+  to update redux state*/
   const removeProduct = async (productId, token, userId, orderId) => {
     props.clearError()
     
@@ -170,9 +192,14 @@ const Checkout = (props) => {
     props.storeOrder(response)
   }
 
+  
+  /*This function updates the selected postage rate for an individual
+  product by passing an object containing the shipment id for
+  the product and the id for the currently selected postage rate into local state*/
   const updatePostageRate = (event, rateId, shipmentId) => {
     event.preventDefault()
 
+    /*check to see if a postage rate has alreay been selected*/
     const shipmentIndex = selectedRates.findIndex(rate => rate.shipmentId === shipmentId)
 
     const rateObj = {
@@ -180,10 +207,12 @@ const Checkout = (props) => {
       rateId
     }
 
+    //If no rate has been selected append a new rate object to end of array
     if (shipmentIndex === -1) {
       return setRates([...selectedRates, rateObj])
     }
 
+    //Else replace the current rate object
     const newArray = [
       ...selectedRates.slice(0, shipmentIndex),
       rateObj,
@@ -193,6 +222,10 @@ const Checkout = (props) => {
     setRates(newArray)
   }
 
+
+  /*This function submits an api request which simultaneously 
+  validates the customer's address and gets postage rates
+  for each product in the order*/
   const getPostageRates = async (event) => {
     event.preventDefault()
     props.clearError()
@@ -228,21 +261,26 @@ const Checkout = (props) => {
     setLoadingMsg('')
   }
 
-  const renderPostageRates = (rates, shipmentId) => {
-    const checkIfSelected = (rateId, shipmentId, selectedRates) => {
-      const shipmentIndex = selectedRates.findIndex(rate => rate.shipmentId === shipmentId)
-      
-      if (shipmentIndex === -1) {
-        return false
-      }
 
-      if (selectedRates[shipmentIndex].rateId === rateId) {
-        return true
-      }
-
+  /*This function checks if an individual postage rate 
+  is selected and returns a boolean that is used to 
+  conditionally add or remove a highlight class*/
+  const checkIfSelected = (rateId, shipmentId, selectedRates) => {
+    const shipmentIndex = selectedRates.findIndex(rate => rate.shipmentId === shipmentId)
+    
+    if (shipmentIndex === -1) {
       return false
     }
 
+    if (selectedRates[shipmentIndex].rateId === rateId) {
+      return true
+    }
+
+    return false
+  }
+
+
+  const renderPostageRates = (rates, shipmentId) => {
     const rateArray = rates.map(rate => {
       return (
         <li 
@@ -253,12 +291,14 @@ const Checkout = (props) => {
             null
           } 
           key={rate.rateId}>
-          { !rate.guaranteedDeliveryTime ? 
-            `Estimated delivery time: ${rate.deliveryTime} days` :
-            `Guaranteed delivery in: ${rate.deliveryTime} days`
-          }
+          <span>
+            { !rate.guaranteedDeliveryTime ? 
+              `Estimated delivery time: ${rate.deliveryTime} days` :
+              `Guaranteed delivery in: ${rate.deliveryTime} days`
+            }
+          </span>
           <span>{rate.serviceName}</span>
-          <div>
+          <div className={styles.carrierAndFee}>
             <span className={styles.fee}>${rate.fee}</span>
             <span>{rate.carrier}</span>
           </div>
@@ -269,8 +309,8 @@ const Checkout = (props) => {
     return rateArray
   }
 
+  
   const renderShipments = shipments => {
-
     const shipmentArray = shipments.map(shipment => {
       return (
         <div className={styles.shipment} key={shipment.shipmentId}>
@@ -285,6 +325,8 @@ const Checkout = (props) => {
     return shipmentArray
   }
 
+
+  //Delete the order, which will empty the cart
   const cancelOrder = async (event, orderId, userId, token) => {
     event.preventDefault()
     props.clearError()
@@ -310,6 +352,10 @@ const Checkout = (props) => {
     navigate.push('/')
   }
 
+  /*This function sends the selected postage rates to update the
+  order in the database or if 'cheapest postage' is selected, the
+  order will be adjusted to make the post api automatically select
+  the cheapest option for all products*/
   const confirmPostageRates = async (event, setLowestRates) => {
     event.preventDefault()
     props.clearError()
@@ -346,6 +392,11 @@ const Checkout = (props) => {
     setLoadingMsg('')
   }
 
+  
+  /*This component renders three different states based on 
+  the current checkout progress. The three different state are:
+  before address confirmation, select postage rates and postage 
+  rates confirmed*/
   const renderPostageOptions = (order, loading) => {
     if (!order.addressConfirmed && !order.postageConfirmed) {
       return <span>Confirm your address to calculate postage</span> 
@@ -380,37 +431,41 @@ const Checkout = (props) => {
     }
   }
 
+  
+  const renderProducts = productArray => {
+    const products = productArray.map((product, index) => {
+      return (
+        <li key={product._id + index} className={styles.productItem}>
+          <span>Product Id: {product._id}</span>
+          <span>Name: {product.name}</span>
+          <span className={styles.price}>${product.price}</span>
+          { !order.addressConfirmed ?
+            <button 
+              className={styles.remove} 
+              onClick={() => removeProduct(product._id, token, userId, props.orderId)}>
+              Remove
+            </button>
+          : null }
+        </li>
+      )
+    })
+
+    return products
+  }
+
   const {order} = props
   const { token, userId } = props.user
 
   return (
     <main>
       { loading ? <Loading msg={loadingMsg}/> : null}
-      { props.order ? 
+      { order ? 
         <div className={styles.checkout} key={order._id}>
           <h3 className={styles.header}>
             <span>Order Id: {order._id}</span>
-            <span>
-              Status: {order.status[0].toUpperCase() + order.status.slice(1)}
-            </span>
           </h3>
           <ul className={styles.products} >
-            { order.products.map((product, index) => {
-              return (
-                <li key={product._id + index} className={styles.productItem}>
-                  <span>Product Id: {product._id}</span>
-                  <span>Name: {product.name}</span>
-                  <span className={styles.price}>${product.price}</span>
-                  { !order.addressConfirmed ?
-                    <button 
-                      className={styles.remove} 
-                      onClick={() => removeProduct(product._id, token, userId, props.orderId)}>
-                      Remove
-                    </button>
-                  : null }
-                </li>
-              )
-            })}
+            {renderProducts(order.products)}
           </ul>
           <h3 className={styles.header}>Delivery Address</h3>
           { !order.addressConfirmed ? 

@@ -17,6 +17,10 @@ import {
 import {storeOrderSummary} from '../../actions/order'
 import {apiHost} from '../../global'
 
+/*This component logs in a user, saves a jwt token and
+basic user information to local storage. If the user is
+of type: 'customer', a summary of their current order is 
+retrieved from the server*/
 const Login = (props) => {
   const navigate = useHistory()
 

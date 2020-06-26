@@ -5,6 +5,7 @@
 .header {
   font-size: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
+  text-align: center;
 }
 
 .form {
@@ -35,26 +36,40 @@
 }
 
 .spec input {
+  
   flex: 1;
   margin-right: var(--spacing-sm);
 }
 
+.spec button {
+  width: max-content;
+}
+
 .save {
-  width: 30rem;
+  width: max-content;
 }
 
 .specificationList {
   list-style: none;
-  margin-top: var(--spacing-sm);
+  margin: var(--spacing-sm) 0;
 }
 
 .listItem {
   font-size: var(--font-sm);
   display: flex;
+  align-items: center;
+  border: var(--bdr-light);
+  padding: .5rem var(--spacing-sm);
+  border-radius: var(--bdr-rad);
 }
 
-.listItem button {
+.listItem:not(:last-child) {
+  margin-bottom: var(--spacing-sm);
+}
+
+.listItem span {
   margin-left: auto;
+  margin-right: 0;
 }
 
 .weight, .dimensions {
@@ -91,4 +106,33 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+@media screen and (max-width: 700px) {
+  .form {
+    margin: 0;
+  }
+
+  .input {
+    width: 100%;
+  }
+
+  .spec {
+    flex-direction: column;
+  }
+
+  .spec input {
+    padding: .8rem;
+    margin-right: 0;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .dimensions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .flexContainer {
+    justify-content: flex-start;
+  }
 }

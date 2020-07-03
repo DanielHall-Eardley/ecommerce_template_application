@@ -4,7 +4,8 @@
 }
 
 .container img {
-  object-fit: contain
+  object-fit: contain;
+  object-position: center 2.4rem;
 }
 
 @media screen and (max-width: 600px) {

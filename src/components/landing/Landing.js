@@ -8,7 +8,7 @@ import Footer from './Footer'
 export default props => {
   return (
     <main>
-      <Banner img='https://ecommerce-demo-website.s3.ca-central-1.amazonaws.com/2018-Dodge-Challenger-SRT-Hellcat-Widebody-V1-1080.jpg_4d590e2a-4459-4d0e-82d7-0c77c6f852d4'/>
+      <Banner img='https://ecommerce-demo-website.s3.ca-central-1.amazonaws.com/pc-background-2.jpg_1ee48f77-32e4-4d6b-921a-41cab66bd4bc'/>
       <About/>
       <Footer/>
     </main>

@@ -32,7 +32,6 @@ const ProductPage = props => {
       if (response.error) {
         return props.displayError(response.error)
       }
-      
       props.storeProductList(response)
     }
     
@@ -51,7 +50,7 @@ const ProductPage = props => {
         <Route path={`${path}/create`}>
           <AddEditProduct />
         </Route>
-        <Route path={`${path}/update/:id`}>
+        <Route path={`${path}/update/:productId`}>
           <AddEditProduct />
         </Route>
         <Route path={`${path}/detail/:id`}>

@@ -2,13 +2,14 @@ import React, {useEffect, useState} from 'react'
 import styles from './ProductDetail.module.css'
 import '../../Global.css'
 import {connect} from 'react-redux'
-import {storeProduct} from '../../actions/product'
+import {storeProduct, removeProduct} from '../../actions/product'
 import {storeOrderSummary} from '../../actions/order'
 import {
   displayError, 
   clearError,
+  displayNotification
 } from '../../actions/notification'
-import {useParams, Link} from 'react-router-dom'
+import {useParams, Link, useHistory} from 'react-router-dom'
 import {apiHost} from '../../global'
 import api from '../../helper/api'
 import sprite from '../../sprite.svg'
@@ -18,13 +19,14 @@ product and allows product to be added to the cart*/
 const ProductDetail = props => {
   const [selectedImage, setImage] = useState(0)
   const productId = useParams().id
+  const navigate = useHistory()
 
   /*This function makes a request to the api to
   get the product details and stores them in redux state*/
   useEffect(() => {
-    clearError()
+    props.clearError()
 
-    const getProduct= async () => {
+    const getProduct = async (productId) => {
       const res = await fetch(apiHost + '/product/detail/' + productId)
       const response = await res.json()
 
@@ -35,7 +37,7 @@ const ProductDetail = props => {
       props.storeProduct(response.product) 
     }
 
-    getProduct()
+    getProduct(productId)
   }, [])
 
   /*This function changes what photo is displayed by
@@ -80,22 +82,53 @@ const ProductDetail = props => {
       'Content-Type': 'application/json'
     }
 
-    const body = JSON.stringify({
+    const body = {
       productId,
       userId: userId,
-    })
+    }
 
     if (url === '/order/update') {
       body.orderId = props.orderId
     }
+
+    const stringifiedBody = JSON.stringify(body)
     
-    const response = await api(url, body, headers, 'POST')
+    const response = await api(url, stringifiedBody, headers, 'POST')
 
     if (response.error) {
       return props.displayError(response.error)
     }
     
     props.storeOrderSummary(response)
+  }
+
+  
+  const deleteProduct = async (productId, userId, token) => {
+    props.clearError()
+   
+    if (!token) {
+      return props.displayError('Please Log In')
+    }
+
+    const headers = {
+      'Authorization': token,
+      'Content-Type': 'application/json'
+    }
+
+    const body = JSON.stringify({
+      productId,
+      userId: userId,
+    })
+    
+    const response = await api('/product/delete', body, headers, 'DELETE')
+
+    if (response.error) {
+      return props.displayError(response.error)
+    }
+    
+    props.removeProduct(productId)
+    props.displayNotification(response.msg)
+    navigate.push('/product')
   }
   
   /*Conditionally render a list of product specifications*/
@@ -164,10 +197,16 @@ const ProductDetail = props => {
         </ul>
       </div>
       <footer className={styles.footer}>
-        <Link to="/product">Back To Products</Link>
+        { props.userType === 'admin' ? 
+          <>
+            <button onClick={() => deleteProduct(_id, props.userId, props.token)}>Delete Product</button>
+            <Link to={'/product/update/' + _id}>Update Product</Link>
+          </>
+        : null}
         {props.userType === 'customer' ?
           <button onClick={() => addToCart(_id, props.userId, props.token)}>Add To Cart</button>
-        : null}
+          : null}
+        <Link to="/product">Back To Products</Link>
       </footer>
     </section>
   )
@@ -186,8 +225,10 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     storeProduct: (product) => dispatch(storeProduct(product)),
+    removeProduct: (productId) => dispatch(removeProduct(productId)),
     storeOrderSummary: (summary) => dispatch(storeOrderSummary(summary)),
     displayError: (error) => dispatch(displayError(error)),
+    displayNotification: (error) => dispatch(displayNotification(error)),
     clearError: () => dispatch(clearError()),
   }
 }

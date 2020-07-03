@@ -62,7 +62,7 @@ exports.login = async (req, res, next) => {
 		}
 
 		const token = jwt.sign({
-			name: findUser.name,
+			userId: findUser._id,
 		}, process.env.JWT_SECRET, {expiresIn: "24h"})
 		const expiration = format(add(new Date(), {days: 1}), "T")
 	

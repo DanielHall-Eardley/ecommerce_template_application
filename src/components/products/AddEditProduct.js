@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import styles from './AddEditProduct.module.css'
 import '../../Global.css'
 import {connect} from 'react-redux'
@@ -17,61 +17,53 @@ import api from '../../helper/api'
 import {uuid} from 'uuidv4'
 
 import Photos from './Photos'
+import {apiHost} from '../../global.js'
 
 
 /*This component is responsible for creating, updating
 products and uploading product images*/
 const AddEditProduct = props => {
   const location = useLocation()
-  const {id} = useParams()
+  const {productId} = useParams()
   const navigate = useHistory()
   const path = location.pathname.split('/')[2]
 
   const [title, setTitle] = useState('Add Product')
 
-  let oldName = ""
-  let oldPrice = ""
-  let oldSpecialPrice = ""
-  let oldDescription = ""
-  let oldPhotoArray = [] 
-  let oldSpecifications = []
-
   /*If this component is reached via 'product/update'
   the product is retrieved from the database and updatable 
   fields in the form are populated with existing product values*/
-  if (path === 'update') {
-    setTitle('Update Product')
-    props.clearError()
-
-    const headers = {
-      'Authorization': props.token,
-      'Content-Type': 'application/json'
-    }
-
-    const getProduct = async (headers) => {
-      const response = await api('/product/update/', {
-        headers
-      })
-
-      if (response.error) {
-        props.displayError(response.error)
+  const useEffectCb = () => {
+    if (path === 'update' && productId) {
+      setTitle('Update Product')
+  
+      const getProduct = async (productId) => {
+        const res = await fetch(apiHost + '/product/detail/' + productId)
+        const response = await res.json()
+  
+        if (response.error) {
+          return displayError(response.error)
+        }
+        
+        const oldProduct = response.product
+        setName(oldProduct.name)
+        setPrice(oldProduct.price)
+        setSpecialPrice(oldProduct.specialPrice)
+        setDescription(oldProduct.description)
+        setSpecifications(oldProduct.specifications)
       }
-      return response
+  
+      getProduct(productId)
     }
-
-    const oldProduct = getProduct(headers)
-
-    oldName = oldProduct.name
-    oldPrice = oldProduct.price
-    oldSpecialPrice = oldProduct.specialPrice
-    oldDescription = oldProduct.description
-    oldSpecifications = oldSpecifications.specifications
   }
-
-  const [name, setName] = useState(oldName)
-  const [price, setPrice] = useState(oldPrice)
-  const [specialPrice, setSpecialPrice] = useState(oldSpecialPrice)
-  const [description, setDescription] = useState(oldDescription)
+  
+  useEffect(useEffectCb, [])
+  
+  const [specificationArray, setSpecifications] = useState([])
+  const [name, setName] = useState('')
+  const [price, setPrice] = useState('')
+  const [specialPrice, setSpecialPrice] = useState('')
+  const [description, setDescription] = useState('')
   const [photoPreviewArray, setPhotoPreviewArray] = useState([])
   const [photoFileArray, setPhotoFileArray] = useState([])
   const [photoUrlArray, setPhotoUrlArray] = useState(null)
@@ -79,7 +71,6 @@ const AddEditProduct = props => {
     name: '',
     content: ''
   })
-  const [specificationArray, setSpecification] = useState(oldSpecifications)
   const [weight, setWeight] = useState('')
   const [width, setWidth] = useState('')
   const [height, setHeight] = useState('')
@@ -88,7 +79,7 @@ const AddEditProduct = props => {
 
   const removeSpec = (name) => {
     const filteredArray = specificationArray.filter(spec => spec.name !== name)
-    setSpecification(filteredArray)
+    setSpecifications(filteredArray)
   }
   
   /*This shows a preview list of all the added product specifications*/
@@ -204,34 +195,42 @@ const AddEditProduct = props => {
 
   /*Update or create product depending on the navigation 
   path used to access page*/
-  const saveProduct = async (event) => {
+  const saveProduct = async (event, productId, token) => {
     event.preventDefault()
     props.clearError()
-    let url = '/product/create'
 
-    if (path === 'update') {
-      url = '/product/update/' + id
+    if (!photoUrlArray && photoFileArray.length > 0) {
+      return props.displayError('You have photos that have not been uploaded')
     }
+    let url = '/product/update/'
+    let method = 'PUT'
 
-    const headers = {
-      'Authorization': props.token,
-      'Content-Type': 'application/json'
-    }
-
-    const product = JSON.stringify({
+    const product = {
       name,
       description,
       price: parseInt(price),
       specialPrice: parseInt(specialPrice),
       specificationArray,
-      width,
-      height,
-      length,
-      weight,
-      photoArray: photoUrlArray
-    })
+      photoArray: photoUrlArray,
+      productId
+    }
 
-    const response = await api(url, product, headers, 'POST')
+    if (!productId) {
+      url = '/product/create'
+      product.width = width
+      product.height = height
+      product.length = length
+      product.weight = weight
+      method = 'POST'
+    }
+
+    const headers = {
+      'Authorization': token,
+      'Content-Type': 'application/json'
+    }
+    const stringifiedProduct = JSON.stringify(product)
+
+    const response = await api(url, stringifiedProduct, headers, method)
   
     if (response.error) {
       return props.displayError(response.error)
@@ -246,7 +245,7 @@ const AddEditProduct = props => {
       name: "",
       content: ''
     })
-    setSpecification([...specificationArray ,specification])
+    setSpecifications([...specificationArray ,specification])
   }
   
   return (
@@ -254,7 +253,7 @@ const AddEditProduct = props => {
       <h1 className={styles.header}>{title}</h1>
       <form 
         className={styles.form} 
-        onSubmit={saveProduct}
+        onSubmit={(event) => saveProduct(event, productId, props.token)}
         encType='multipart/form-data'>
         <label>Enter Product Name</label>
         <input 
@@ -370,7 +369,8 @@ const AddEditProduct = props => {
 
 const mapStateToProps = state => {
   return {
-    token: state.user.token
+    token: state.user.token,
+    userId: state.user.userId
   }
 }
 

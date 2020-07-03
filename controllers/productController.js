@@ -1,4 +1,5 @@
 const {Product} = require('../models/product')
+const {User} = require('../models/user')
 const errorHandler = require('../helper/errorHandler')
 const checkValidationErr = require('../helper/checkValidationErr')
 const aws = require('aws-sdk')
@@ -81,6 +82,12 @@ exports.s3Signatures = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     checkValidationErr(req)
+
+    const user = await User.findById(req.body.tokenUserId)
+   
+    if (user.type !== 'admin') {
+      errorHandler(401, ['You are not authorized to create products'])
+    }
     
     const product = new Product({
       name: req.body.name,
@@ -112,9 +119,14 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     checkValidationErr(req)
+
+    const user = await User.findById(req.body.tokenUserId)
+
+    if (user.type !== 'admin') {
+      errorHandler(401, ['You are not authorized to update products'])
+    }
     
-    const productId = req.body.productId
-    const product = await Product.findById(productId)
+    const product = await Product.findById(req.body.productId)
     
     if (!product) {
       errorHandler(500, ['Unable to find product'])
@@ -142,10 +154,18 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
   try {
-    const productId = req.params.id
-    const product = Product.findByIdAndDelete(productId)
+    const userId = req.body.userId
+    const productId = req.body.productId
 
-    if (!product) {
+    const user = await User.findById(userId)
+
+    if (user.type !== 'admin') {
+      errorHandler(401, ['You are not authorized to remove this product'])
+    }
+
+    const deleteResponse = await Product.deleteOne({_id: productId})
+    
+    if (deleteResponse.deletedCount === 0) {
       errorHandler('There was a problem deleting the product')
     }
 

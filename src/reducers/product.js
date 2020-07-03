@@ -4,7 +4,8 @@ import {
   FILTER_PRODUCT_LIST, 
   CLEAR_PRODUCT_LIST,
   ADD_PRODUCT,
-  FINISH_SEARCH
+  FINISH_SEARCH,
+  REMOVE_PRODUCT
 } from '../actions/product'
 
 const initialState = {
@@ -41,11 +42,26 @@ const user = (state = initialState, action) => {
         productList: [...state.productList, action.product],
         filteredList: [...state.filteredList, action.product],
       }
+    case REMOVE_PRODUCT: 
+      const checkForProduct = state.productList.findIndex(product => product._id === action.productId)
+
+      if (checkForProduct === -1) {
+        return
+      } 
+
+      const filteredProductList = [
+        ...state.productList.slice(0, checkForProduct),
+        ...state.productList.slice(checkForProduct + 1)
+      ]
+      return {
+        ...state,
+        productList: filteredProductList
+      }
     case FINISH_SEARCH: 
-    return {
-      ...state,
-      searching: false
-    }
+      return {
+        ...state,
+        searching: false
+      }
     case CLEAR_PRODUCT_LIST: 
       return initialState
     default: 

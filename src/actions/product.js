@@ -4,6 +4,7 @@ export const CLEAR_PRODUCT_LIST = 'CLEAR_PRODUCT_LIST'
 export const STORE_PRODUCT = 'STORE_PRODUCT'
 export const ADD_PRODUCT = 'ADD_PRODUCT'
 export const UPDATE_PRODUCT = 'UPDATE_PRODUCT'
+export const REMOVE_PRODUCT = 'REMOVE_PRODUCT'
 export const FINISH_SEARCH = 'FINISH_SEARCH'
 
 export const storeProductList = (list) => {
@@ -51,5 +52,12 @@ export const updateProduct = (product) => {
 export const clearProductList = () => {
   return {
     type: CLEAR_PRODUCT_LIST,
+  }
+}
+
+export const removeProduct = productId => {
+  return {
+    type: REMOVE_PRODUCT,
+    productId
   }
 }

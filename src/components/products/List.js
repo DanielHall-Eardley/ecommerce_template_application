@@ -25,7 +25,7 @@ const List = props => {
         <div key={prd._id} className={styles.listItem}>
           <h3 className={styles.name}>{prd.name}</h3>
           <span className={styles.price}>${prd.price}</span>
-          <img src={prd.photoArray[0]} alt='' className={styles.img}/>
+          <img src={prd.photoArray ? prd.photoArray[0] : null} alt='' className={styles.img}/>
           <p className={styles.content}>{prd.description}</p>
           <Link className={styles.link} to={'/product/detail/' + prd._id}>View</Link>
         </div>

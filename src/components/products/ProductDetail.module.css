@@ -2,8 +2,8 @@
   height: 72vh;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: 50rem 1fr;
-  grid-template-rows: min-content 40rem auto auto;
+  grid-template-columns: 55% 1fr;
+  grid-template-rows: min-content 54rem auto auto;
   background-color: var(--light-purple);
 }
 
@@ -20,17 +20,13 @@
 
 .inc, .dec {
   position: absolute;
-  fill: var(--white);
-  height: 3rem;
-  width: 3rem;
+  fill: var(--charcoal);
+  height: 4rem;
+  width: 4rem;
 }
 
 .inc:hover, .dec:hover {
   fill: var(--golden);
-}
-
-.inc:hover, .dec:hover {
-  color: var(--pink);
 }
 
 .inc {
@@ -75,6 +71,14 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+
+.footer button {
+  margin-right: var(--spacing-lg);
+}
+
+.footer a:last-of-type {
+  margin-left: auto;
 }
 
 .specifications, .dimensions {

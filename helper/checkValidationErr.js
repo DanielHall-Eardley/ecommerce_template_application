@@ -4,9 +4,9 @@ const errorHandler = require("./errorHandler")
 const checkForValidationErr = req => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors.errors)
+
     const errorMessages = errors.errors.map(err => {
-      return err.msg
+      return `${err.param} ${err.msg} instead received ${err.value}`
     })
 
     errorHandler(422, errorMessages);

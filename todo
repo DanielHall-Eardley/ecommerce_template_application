@@ -1,0 +1,8 @@
+Improve photo upload process
+- Add visual confirmation of successful photo upload
+- Allow user to upload more than one group of photos in product creation
+- Allow user to delete photos
+- Prevent user from uploading duplicate photos when updating a product
+
+Add refund functionality
+- Research Stripe and EasyPost to ascertain viability

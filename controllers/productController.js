@@ -136,7 +136,7 @@ exports.update = async (req, res, next) => {
     product.price = req.body.price
     product.specialPrice = req.body.specialPrice
     product.description = req.body.description
-    product.photoArray = req.body.photoArray
+    product.photoArray = [...product.photoArray, ...req.body.photoArray]
     product.specifications = req.body.specificationArray
   
     const savedProduct = await product.save()

@@ -54,13 +54,15 @@ const App = props => {
     const result = checkLogin()
     
     if (result.error) {
-      return props.clearUser()
+      props.clearUser()
+    } else {
+      props.storeUser(result.user)
     }
     
-    props.storeUser(result.user)
-  
-    if (result.user.type === 'customer') {
-      getOrderSummary(result.user.userId, result.user.token)
+    if (result.user) {
+      if (result.user.type === 'customer') {
+        getOrderSummary(result.user.userId, result.user.token)
+      }
     }
   }, [])
 

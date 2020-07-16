@@ -67,11 +67,9 @@ const Login = (props) => {
   
       const orderResponse = await res.json()
   
-      if (orderResponse.error) {
-        return
+      if (!orderResponse.error) {
+        props.storeOrderSummary(orderResponse)
       }
-  
-      props.storeOrderSummary(orderResponse)
     }
     
     navigate.push('/product')

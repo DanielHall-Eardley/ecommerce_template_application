@@ -15,12 +15,12 @@ const Search = props => {
   const [query, setQuery] = useState('')
   const navigation = useHistory()
 
-  const navToProductAdd = () => {
+  const navToProductAdd = (event) => {
     navigation.push('/product/create')
   }
 
   /*This function dispatches a query to the product list in redux state*/
-  const searchProducts = () => {
+  const searchProducts = (event) => {
     props.filterProductList(query)
     navigation.push('/product')
   }
@@ -32,10 +32,12 @@ const Search = props => {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} role='search' aria-label='Product search'>
       <input 
+        role='searchbox'
         className={styles.input}
         type="text" 
+        aria-label='Enter product search query'
         placeholder="Search for a product"
         value={query} 
         onChange={event => setQuery(event.target.value)}/>
@@ -49,6 +51,7 @@ const Search = props => {
           props.userType === 'admin' ?
           <button 
             onClick={() => navToProductAdd(navigation)}
+            onKeyUp={() => navToProductAdd(navigation)}
             className={styles.btnMargin}>
             Add New Product
           </button> :

@@ -77,15 +77,17 @@ const Login = (props) => {
 
   return (
     <section>
-      <form onSubmit={login} className={styles.login}>
-        <label htmlFor="">Email</label>
-        <input 
+      <form onSubmit={login} className={styles.login} aria-label='login'>
+        <label htmlFor="input-login-email">Email</label>
+        <input
+          id='input-login-email' 
           type="email" 
           placeholder='Email'
           value={email}
           onChange={(event) => setEmail(event.target.value)}/>
-        <label htmlFor="">Password</label>
+        <label htmlFor="input-login-password">Password</label>
         <input 
+          id='input-login-password'
           type="password" 
           placeholder="Password"
           value={password}

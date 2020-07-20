@@ -1,9 +1,3 @@
-header {
-  height: 10vh;
-  border-bottom: var(--bdr-light);
-  display: flex;
-}
-
 @media screen and (max-width: 900px) {
   header {
     flex-direction: column;
@@ -15,25 +9,28 @@ header {
 .nav {
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 
 @media screen and (max-width: 900px) {
   .nav {
-    margin-left: var(--spacing-md);
     margin-bottom: var(--spacing-sm);
   }
 } 
 
 @media screen and (max-width: 500px) {
   .nav {
-    margin-left: var(--spacing-md);
+    width: 100%;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
     margin-bottom: var(--spacing-sm);
     display: grid;
     grid-template-columns: 1fr min-content;
     row-gap: var(--spacing-sm);
+    justify-items: start;
   }
 
-  .nav a, .nav span {
+  .nav a, .nav button {
     grid-column: 1 / 2;
   }
 }

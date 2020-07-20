@@ -5,7 +5,7 @@ import '../../Global.css'
 export default props => {
   return (
     <div className={styles.container}>
-      <img src={props.img} alt=""/>
+      <img src={props.img} alt="banner"/>
     </div>
   )
 }

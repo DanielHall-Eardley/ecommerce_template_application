@@ -72,6 +72,7 @@ const App = props => {
         <Title title='Ecommerce Demo Website'/>
         <Menu/>
       </header>
+      <span id='main-content'></span>
       <Notification error={props.error} notification={props.notification}/> 
       <Switch>
         <Route path='/order'>

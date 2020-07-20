@@ -1,19 +1,22 @@
 .container {
   display: flex;
   align-items: center;
-  height: 10vh;
   border-bottom: var(--bdr-light);
-  padding: 0 var(--spacing-sm);
+  padding: var(--spacing-sm);
+  position: sticky;
+  top: 0;
+  background-color: var(--white);
+  z-index: 2;
 }
 
 .container button {
-  height: 6vh;
+  height: 4.5rem;
 }
 
 .input {
   flex: 1;
   margin-right: var(--spacing-sm);
-  height: 6vh;
+  height: 4.5rem;
   font-size: var(--font-sm);
 }
 

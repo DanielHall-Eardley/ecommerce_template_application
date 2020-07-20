@@ -109,28 +109,37 @@ const ProductDetail = props => {
     props.storeOrderList(response.past, response.pending)
   }
 
+  const toggleOrderTab = (event, tab) => {
+    setList(tab)
+  }
+
 
   /*Orders are sorted into 'pending' which are orders that have been
   payed for but not sent and 'fufilled', orders that have been sent*/
   return (
     <section>
-      <div className={styles.select}>
-        <span 
+      <div 
+        className={styles.select} 
+        role='tabpanel' 
+        aria-label='select between pending or fulfilled orders'>
+        <button 
+          role='tab'
           className={
             selectedOrderList === 'past' ?
             styles.selected : null
           }
-          onClick={() => setList('past')}>
+          onClick={(event) => toggleOrderTab(event, 'past')}>
           Fulfilled
-        </span>
-        <span 
+        </button>
+        <button 
+          role='tab'
           className={
             selectedOrderList === 'pending' ?
             styles.selected : null
           }
-          onClick={() => setList('pending')}>
+          onClick={(event) => toggleOrderTab(event, 'pending')}>
           Pending
-        </span>
+        </button>
       </div>
       <List 
         orderList={props[selectedOrderList + 'OrderList']} 

@@ -139,24 +139,29 @@ exports.list = async (req, res, next) => {
   try {
     const userId = req.params.id
     const user = await User.findById(userId)
+
     let selectedFields = '-paymentId'
+    const pastQuery = {
+      payment: {$ne: null},
+      fulfilled: {$ne: null}
+    }
+
+    const pendingQuery = {
+      payment: {$ne: null},
+      fulfilled: null 
+    }
+
     if (user.type === 'customer') {
       selectedFields = '-paymentId -shipments'
-    } 
-
-    const orderPendingPromise = Order.find({
-      customerId: userId, 
-      payment: {$ne: null}, 
-      fulfilled: null
-    })
+      pastQuery.customerId = user._id
+      pendingQuery.customerId = user._id
+    }
+    
+    const orderPendingPromise = Order.find(pendingQuery)
     .sort({updatedAt: 'asc'})
     .select(selectedFields)
 
-    const orderPastPromise = Order.find({
-      customerId: userId, 
-      payment: {$ne: null},
-      fulfilled: {$ne: null}
-    })
+    const orderPastPromise = Order.find(pastQuery)
     .sort({updatedAt: 'asc'})
     .select(selectedFields)
 
@@ -268,7 +273,7 @@ exports.getLabels = async (req, res, next) => {
         const boughtShipment = await retrievedShipment.buy(shipment.selectLowestRate(['CanadaPost'], ["First"]))
         
         if (!boughtShipment.postage_label.label_url) {
-          return errorHandler(500, ['There was a problem creating the shipping label'])
+          errorHandler(500, ['There was a problem creating the shipping label'])
         }
 
         shipment.postageLabel = boughtShipment.postage_label.label_url
@@ -279,13 +284,13 @@ exports.getLabels = async (req, res, next) => {
         const boughtShipment = await retrievedShipment.buy(shipment.selectedRateId)
         
         if (!boughtShipment.postage_label.label_url) {
-          return errorHandler(500, ['There was a problem creating the shipping label'])
+          errorHandler(500, ['There was a problem creating the shipping label'])
         }
 
         shipment.postageLabel = boughtShipment.postage_label.label_url
       }
     }
-
+    console.log(order)
     const updatedOrder = await order.save()
 
     if (!updatedOrder) {

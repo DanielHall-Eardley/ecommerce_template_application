@@ -13,6 +13,7 @@ import {useParams, Link, useHistory} from 'react-router-dom'
 import {apiHost} from '../../global'
 import api from '../../helper/api'
 import sprite from '../../sprite.svg'
+import checkKeyCode from '../../helper/checkKeyCode'
 
 /*This component shows the details for a selected
 product and allows product to be added to the cart*/
@@ -20,23 +21,22 @@ const ProductDetail = props => {
   const [selectedImage, setImage] = useState(0)
   const productId = useParams().id
   const navigate = useHistory()
+  props.clearError()
 
   /*This function makes a request to the api to
   get the product details and stores them in redux state*/
   useEffect(() => {
-    props.clearError()
-
     const getProduct = async (productId) => {
       const res = await fetch(apiHost + '/product/detail/' + productId)
       const response = await res.json()
 
       if (response.error) {
-        return displayError(response.error)
+        displayError(response.error)
+      } else {
+        props.storeProduct(response.product) 
       }
-    
-      props.storeProduct(response.product) 
     }
-
+      
     getProduct(productId)
   }, [])
 
@@ -44,7 +44,6 @@ const ProductDetail = props => {
   incrementing or decrementing the index of the photoArray*/
   const changePhoto = (direction, end) => {
     const start = 0
-
     if (direction === 'inc') {
       if (selectedImage === end) {
         return
@@ -64,7 +63,7 @@ const ProductDetail = props => {
 
   /*This function will create an order and add the selected product to it. 
   If a current order already exists it will update it with the selected product */
-  const addToCart = async (productId, userId, token) => {
+  const addToCart = async (event, productId, userId, token) => {
     props.clearError()
    
     if (!token) {
@@ -103,7 +102,7 @@ const ProductDetail = props => {
   }
 
   
-  const deleteProduct = async (productId, userId, token) => {
+  const deleteProduct = async (event, productId, userId, token) => {
     props.clearError()
    
     if (!token) {
@@ -162,33 +161,46 @@ const ProductDetail = props => {
   } = props.product
   
   return (
-    <section className={styles.container}>
+    <main className={styles.container} aria-label='product details'>
       <h1 className={styles.heading + ' heading'}>
         <span>{name}</span>
-        <span>${price}</span>
+        <span aria-label='product price'>${price}</span>
       </h1>
-      <div className={styles.images}>
-        <img src={photoArray ? photoArray[selectedImage] : null} alt=""/>
-        <svg className={styles.inc}
-          onClick={() => changePhoto('inc', photoArray.length - 1)}>
-          <use href={sprite + '#icon-chevron-thin-right'}></use>
-        </svg>
-        <svg className={styles.dec}
-          onClick={() => changePhoto('dec', photoArray.length - 1)}>
-          <use href={sprite + '#icon-chevron-thin-left'}></use>
-        </svg>
-      </div>
-      <p className={styles.description}>{description}</p>
+      <section className={styles.images} aria-label='image carousel'>
+        <img 
+          src={photoArray ? photoArray[selectedImage] : null} 
+          alt="product" 
+          aria-live='polite'/>
+        <button 
+          className={styles.inc} 
+          onClick={() => changePhoto('inc', photoArray.length - 1)}
+          aria-label='next photo'>
+          <svg className='btn-svg'>
+            <use href={sprite + '#icon-chevron-thin-right'}></use>
+          </svg>
+        </button>
+        <button 
+          className={styles.dec} 
+          onClick={() => changePhoto('dec', photoArray.length - 1)}
+          aria-label='previous photo'>
+          <svg className='btn-svg'>
+            <use href={sprite + '#icon-chevron-thin-left'}></use>
+          </svg>
+        </button>
+      </section>
+      <p className={styles.description} aria-label='product description'>
+        {description}
+      </p>
       { specifications?.length > 1 || !specifications ?
-        <div className={styles.specifications}>
-          <h2>Technical specifications</h2>
+        <section className={styles.specifications} aria-labelledby='specification-list-header'>
+          <h2 id='specification-list-header'>Technical specifications</h2>
           <ul>
             {specificationList(specifications)}
           </ul>
-        </div>
+        </section>
       : null}
-      <div className={styles.dimensions}>
-        <h2>Dimensions</h2>
+      <div className={styles.dimensions} aria-labelledby='dimension-list-header'>
+        <h2 id='dimension-list-header'>Dimensions</h2>
         <ul>
           <li className={styles.listItem}><span>Weight</span> {weight} lbs</li>
           <li className={styles.listItem}><span>Height</span> {height} inches</li>
@@ -199,16 +211,22 @@ const ProductDetail = props => {
       <footer className={styles.footer}>
         { props.userType === 'admin' ? 
           <>
-            <button onClick={() => deleteProduct(_id, props.userId, props.token)}>Delete Product</button>
+            <button 
+              onClick={(event) => deleteProduct(event, _id, props.userId, props.token)}>
+              Delete Product
+            </button>
             <Link to={'/product/update/' + _id}>Update Product</Link>
           </>
         : null}
         {props.userType === 'customer' ?
-          <button onClick={() => addToCart(_id, props.userId, props.token)}>Add To Cart</button>
+          <button 
+            onClick={(event) => addToCart(event, _id, props.userId, props.token)}>
+            Add To Cart
+          </button>
           : null}
         <Link to="/product">Back To Products</Link>
       </footer>
-    </section>
+    </main>
   )
 }
 

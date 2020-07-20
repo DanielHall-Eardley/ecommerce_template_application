@@ -19,7 +19,7 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
     if (userType === 'admin' && !order.fulfilled) {
       return order.shipments.map(shipment => {
         return (
-          <li key={shipment.shipmentId} className={styles.productItem}>
+          <li key={shipment.shipmentId} className={styles.productItem} aria-label='shipment'>
             <span>Product Id: {shipment.productId}</span>
             <span>Name: {shipment.productName}</span>
             { shipment.postageLabel ?
@@ -31,7 +31,7 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
     } else {
       return order.products.map(product => {
         return (
-          <li key={product.name} className={styles.productItem}>
+          <li key={product.name} className={styles.productItem} aria-label='product'>
             <span>Product Id: {product._id}</span>
             <span>Name: {product.name}</span>
             <span>${product.price}</span>
@@ -48,7 +48,7 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
   const renderOrderList = (orders) => {
     return orders.map(order => {
       return (
-        <div className={styles.listItem} key={order._id}>
+        <li className={styles.listItem} key={order._id}>
           <h3 className={styles.header}>
             <span>Order Id: {order._id}</span>
             <span>Status: {order.status}</span>
@@ -57,12 +57,11 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
               'Sent: ' + format(new Date(order.fulfilled), "do MMM yyyy") :
               'Placed: ' + format(new Date(order.payment), "do MMM yyyy")}
             </span>
-            
           </h3>
-          <ul className={styles.products} >
+          <ul className={styles.products} aria-label='product'>
             {productOrShipmentList(order, userType)}
           </ul>
-          <ul className={styles.address}>
+          <ul className={styles.address} aria-label='address'>
             <li>Street: {order.customerAddress.street1}</li>
             <li>
               Apt/Unit: {order.customerAddress.street2}
@@ -73,7 +72,7 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
             <li>Zip/Postcode: {order.customerAddress.zip}</li>
           </ul>
           { userType === 'admin' ?
-            <div className={styles.recipient}>
+            <div className={styles.recipient} aria-label='customer information'>
               <span>Customer: {order.customerName}</span>
               <span>Email: {order.customerEmail}</span>
               <span>Phone: {order.clientPhoneNumber}</span>
@@ -93,15 +92,15 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
             <span>Amount of items: {order.count}</span>
             <span>Total: {order.total}</span>
           </div>
-        </div>
+        </li>
       )
     })
   }
 
   return (
-    <div className={styles.container}>
+    <ul className={styles.container} aria-label='order'>
       {renderOrderList(orderArray)}
-    </div>
+    </ul>
   )
 }
 

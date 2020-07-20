@@ -52,7 +52,6 @@ html {
   }
 }
 
-
 /*stripe styles*/
 .StripeElement {
   padding: var(--spacing-sm);
@@ -76,6 +75,21 @@ html {
   background-color: #fefde5 !important;
 }
 
+#skip-link {
+  opacity: 0;
+}
+
+#skip-link:focus {
+  opacity: 1;
+}
+
+header {
+  height: 8rem;
+  border-bottom: var(--bdr-light);
+  display: flex;
+  align-items: center;
+}
+
 a,
 a:visited,
 .default-link,
@@ -91,12 +105,32 @@ a:visited,
   margin-right: var(--spacing-md);
 }
 
-default-link:hover, a:hover {
+.default-link:hover, a:hover {
   color: var(--pink);
 }
 
-default-link:active, a:active{
+.default-link:active, a:active{
   color: red;
+}
+
+.btn-link {
+  padding: 0;
+  width: min-content;
+  height: min-content;
+}
+
+.btn-link:hover, .btn-link:focus {
+  background-color: transparent;
+}
+
+.btn-svg {
+  height: 100%;
+  width: 100%;
+  fill: grey;
+}
+
+.btn-svg:hover {
+  fill: var(--golden);
 }
 
 input, select {
@@ -122,7 +156,7 @@ input:focus {
   color: var(--white);
 }
 
-.primary-btn:hover, button:hover {
+.primary-btn:hover, button:hover, .primary-btn:focus, button:focus {
   background-color: var(--golden);
 }
 
@@ -138,6 +172,10 @@ p {
   word-spacing: 3px;
   white-space: pre-line;
   overflow: hidden;
+}
+
+ul {
+  list-style: none;
 }
 
 .active {

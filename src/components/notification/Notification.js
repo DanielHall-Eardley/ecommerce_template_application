@@ -20,9 +20,9 @@ export default props => {
   }
 
   return (
-    <h3>
+    <p role='alert' aria-label='notification'>
       {notificationArray(props.error, 'error')}
       {notificationArray(props.notification, 'notification')}
-    </h3>
+    </p>
   )
 }

@@ -85,13 +85,13 @@ const AddEditProduct = props => {
   /*This shows a preview list of all the added product specifications*/
   const specificationList = specificationArray.map(spec => {
     return (
-      <li className={styles.listItem} key={spec.name}>
+      <li className={styles.listItem} key={spec.name} aria-label='product specification'>
         <b>{spec.name}</b>: {spec.content}
-        <span
+        <button
           onClick={() => removeSpec(spec.name)}
-          className='default-link'>
-          Remove
-        </span>
+          className='default-link btn-link'>
+          Remove Specification
+        </button>
       </li>
     )
   })
@@ -249,34 +249,38 @@ const AddEditProduct = props => {
   }
   
   return (
-    <section className={styles.container}>
-      <h1 className={styles.header}>{title}</h1>
+    <section className={styles.container} aria-labelledby='product-add-edit'>
+      <h1 className={styles.header} id='product-add-edit '>{title}</h1>
       <form 
         className={styles.form} 
         onSubmit={(event) => saveProduct(event, productId, props.token)}
         encType='multipart/form-data'>
-        <label>Enter Product Name</label>
+        <label htmlFor='input-product-name'>Enter Product Name</label>
         <input 
+          id='input-product-name'
           className={styles.input}
           type="text" 
           value={name} 
           onChange={event => setName(event.target.value)} />
-        <label>Enter Price</label>
+        <label htmlFor='input-product-price'>Enter Price</label>
         <input 
+          id='input-product-price'
           className={styles.input}
           type="number"
           step='any' 
           value={price} 
           onChange={event => setPrice(event.target.value)} />
-        <label>Enter Special Price</label>
+        <label htmlFor='input-product-special-price'>Enter Special Price</label>
         <input 
+          id='input-product-special-price'
           className={styles.input}
           step='any'
           type="number" 
           value={specialPrice} 
           onChange={event => setSpecialPrice(event.target.value)} />
-        <label>Enter Product Description</label>
+        <label htmlFor='input-product-description'>Enter Product Description</label>
         <textarea 
+          id='input-product-description'
           className={styles.textarea}
           type="text" 
           value={description} 
@@ -289,8 +293,8 @@ const AddEditProduct = props => {
           setPhotoArray={setPhotoPreviewArray}
           fileArray={photoFileArray}
           setFileArray={setPhotoFileArray}/>
-        <label>Add Product Specifications</label>
-        <div className={styles.spec}>
+        <label id='input-product-spec'>Add Product Specifications</label>
+        <div className={styles.spec} aria-labelledby='input-product-spec'>
           <input 
             type="text" 
             placeholder="Specification Name"
@@ -321,8 +325,9 @@ const AddEditProduct = props => {
         { path === 'create' ? (
           <div className={styles.dimensions}>
             <div>
-              <label>Enter Product Weight in ounces</label>
+              <label htmlFor='input-product-weight'>Enter Product Weight in ounces</label>
               <input 
+                id='input-product-weight'
                 className={styles.input}
                 step='any'
                 type="number" 
@@ -330,8 +335,9 @@ const AddEditProduct = props => {
                 onChange={event => setWeight(event.target.value)} />
             </div>
             <div>
-              <label>Enter Product Length in inches</label>
+              <label htmlFor='input-product-length'>Enter Product Length in inches</label>
               <input 
+                id='input-product-length'
                 className={styles.input}
                 step='any'
                 type="number" 
@@ -339,8 +345,9 @@ const AddEditProduct = props => {
                 onChange={event => setLength(event.target.value)} />
             </div>
             <div>
-              <label>Enter Product Width in inches</label>
+              <label htmlFor='input-product-width'>Enter Product Width in inches</label>
               <input 
+                id='input-product-width'
                 className={styles.input}
                 step='any'
                 type="number" 
@@ -348,8 +355,9 @@ const AddEditProduct = props => {
                 onChange={event => setWidth(event.target.value)} />
             </div>
             <div>
-              <label>Enter Product Height in inches</label>
+              <label htmlFor='input-product-height'>Enter Product Height in inches</label>
               <input 
+                id='input-product-height'
                 className={styles.input}
                 step='any'
                 type="number" 

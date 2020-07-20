@@ -88,9 +88,15 @@
   padding: 1rem;
   border: var(--bdr-light);
   border-radius: var(--bdr-rad);
+}
+
+.rateList li button {
   display: flex;
   justify-content: space-between;
-  cursor: pointer;
+  width: 100%;
+  align-items: center;
+  background-color: transparent;
+  color: var(--charcoal);
 }
 
 .rateList li:not(:last-child) {
@@ -102,7 +108,7 @@
 }
 
 .selected {
-  background-color: var(--light-grey);
+  background-color: var(--light-grey) !important;
 }
 
 .confirmPostage {

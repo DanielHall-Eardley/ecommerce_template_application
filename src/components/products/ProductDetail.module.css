@@ -1,7 +1,6 @@
 .container {
-  height: 72vh;
-  overflow-y: auto;
   display: grid;
+  margin-bottom: 8rem;
   grid-template-columns: 55% 1fr;
   grid-template-rows: min-content 54rem auto auto;
   background-color: var(--light-purple);
@@ -20,13 +19,13 @@
 
 .inc, .dec {
   position: absolute;
-  fill: var(--charcoal);
-  height: 4rem;
-  width: 4rem;
+  height: 6rem;
+  width: 6rem;
+  background-color: transparent;
 }
 
 .inc:hover, .dec:hover {
-  fill: var(--golden);
+  background-color: transparent;
 }
 
 .inc {
@@ -66,7 +65,7 @@
   width: auto;
   background-color: var(--white);
   border-top: var(--bdr-light);
-  height: 8vh;
+  height: 8rem;
   padding: 0 var(--spacing-sm);
   display: flex;
   justify-content: flex-end;

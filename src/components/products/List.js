@@ -22,13 +22,17 @@ const List = props => {
   const productList = (products) => {
     const productList = products.map(prd => {
       return(
-        <div key={prd._id} className={styles.listItem}>
+        <article key={prd._id} className={styles.listItem} aria-label='product'>
           <h3 className={styles.name}>{prd.name}</h3>
-          <span className={styles.price}>${prd.price}</span>
-          <img src={prd.photoArray ? prd.photoArray[0] : null} alt='' className={styles.img}/>
-          <p className={styles.content}>{prd.description}</p>
-          <Link className={styles.link} to={'/product/detail/' + prd._id}>View</Link>
-        </div>
+          <span className={styles.price} aria-label='product price'>
+            ${prd.price}
+          </span>
+          <img src={prd.photoArray ? prd.photoArray[0] : null} alt='product' className={styles.img}/>
+          <p className={styles.content} aria-label='product description'>
+            {prd.description}
+          </p>
+          <Link className={styles.link} to={'/product/detail/' + prd._id}>Details</Link>
+        </article>
       )
     })
 
@@ -36,7 +40,7 @@ const List = props => {
   }
 
   return (
-    <section className={styles.container}>
+    <section className={styles.container} aria-label='list of products'>
       {productList(currentProductList)}
     </section>
   )

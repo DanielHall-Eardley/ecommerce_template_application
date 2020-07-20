@@ -47,18 +47,24 @@ const Signup = (props) => {
 
   return (
     <section className={styles.container}>
-      <form onSubmit={signup} className={styles.signup}>
+      <form onSubmit={signup} className={styles.signup} aria-label='signup'>
+        <label htmlFor="input-signup-name">Name</label>
         <input 
+          id='input-signup-name'
           placeholder='Enter Name'
           type="text" 
           value={name} 
           onChange={(event) => setName(event.target.value)}/>
+        <label htmlFor="input-signup-email">Email</label>
         <input 
+          id='input-signup-email'
           placeholder='Enter Email'
           type="email" 
           value={email}
           onChange={(event) => setEmail(event.target.value)}/>
+        <label htmlFor="input-signup-password">Password</label>
         <input 
+          id='input-signup-password'
           placeholder="Enter a Password"
           type="password" 
           value={password}

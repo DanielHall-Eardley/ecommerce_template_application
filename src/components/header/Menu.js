@@ -16,9 +16,10 @@ const Menu = props => {
   if (userId && userType === 'admin') {
     return (
       <nav className={styles.nav}>
+        <a href='#main-content' id='skip-link'>Skip to main content</a>
         <NavLink to='/product'>Products</NavLink>
         <NavLink to='/order'>Orders</NavLink>
-        <span className='default-link' onClick={props.clearUser}>Logout</span>
+        <button className='default-link btn-link' role='link' onClick={props.clearUser}>Logout</button>
         <NavLink exact={true} to='/'>Home</NavLink> 
       </nav>
     )
@@ -27,17 +28,21 @@ const Menu = props => {
     /*This if statement renders the customer menu*/
     return (
       <nav className={styles.nav}>
+        <a href='#main-content' id='skip-link'>Skip to main content</a>
         <NavLink to='/product'>Products</NavLink>
         <NavLink to='/order'>Orders</NavLink>
         <NavLink to='/checkout'>Checkout</NavLink>
         <NavLink exact={true} to='/'>Home</NavLink> 
-        <span className='default-link' onClick={props.clearUser}>Logout</span>
+        <button className='default-link btn-link' role='link' onClick={props.clearUser}>Logout</button>
         <div className={styles.cartContainer}>
-          <svg className={ props.orderSummary.count > 0 ? styles.cart + ' ' + styles.highlight : styles.cart}>
+          <svg aria-label='Shopping cart icon' className={ props.orderSummary.count > 0 ? styles.cart + ' ' + styles.highlight : styles.cart}>
             <use href={sprite + '#icon-cart'}></use>
           </svg>
           { props.orderSummary.count > 0 ?
-            <span className={styles.cartTotal}>{props.orderSummary.count}</span>
+            <span 
+              aria-label='Number of products in shopping cart'
+              aria-live='polite' 
+              className={styles.cartTotal}>{props.orderSummary.count}</span>
           : null}
         </div>
       </nav>
@@ -48,6 +53,7 @@ const Menu = props => {
       no user is logged in. Only the products page can be accessed
       in this state*/
       <nav className={styles.nav}>
+        <a href='#main-content' id='skip-link'>Skip to main content</a>
         <NavLink exact={true} to='/'>Home</NavLink> 
         <NavLink to='/product'>Products</NavLink>
         <NavLink to='/login'>Login</NavLink>

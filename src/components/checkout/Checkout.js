@@ -283,25 +283,27 @@ const Checkout = (props) => {
   const renderPostageRates = (rates, shipmentId) => {
     const rateArray = rates.map(rate => {
       return (
-        <li 
-          onClick={(event) => updatePostageRate(event, rate.rateId, shipmentId)}
+        <li key={rate.rateId}
           className={
             checkIfSelected(rate.rateId, shipmentId, selectedRates) ?
             styles.selected :
             null
-          } 
-          key={rate.rateId}>
-          <span>
-            { !rate.guaranteedDeliveryTime ? 
-              `Estimated delivery time: ${rate.deliveryTime} days` :
-              `Guaranteed delivery in: ${rate.deliveryTime} days`
-            }
-          </span>
-          <span>{rate.serviceName}</span>
-          <div className={styles.carrierAndFee}>
-            <span className={styles.fee}>${rate.fee}</span>
-            <span>{rate.carrier}</span>
-          </div>
+          }>
+          <button 
+            aria-label='select postage rate'
+            onClick={(event) => updatePostageRate(event, rate.rateId, shipmentId)}>
+            <span>
+              { !rate.guaranteedDeliveryTime ? 
+                `Estimated delivery time: ${rate.deliveryTime} days` :
+                `Guaranteed delivery in: ${rate.deliveryTime} days`
+              }
+            </span>
+            <span>{rate.serviceName}</span>
+            <div className={styles.carrierAndFee}>
+              <span className={styles.fee}>${rate.fee}</span>
+              <span>{rate.carrier}</span>
+            </div>
+          </button>
         </li>
       )
     })
@@ -313,12 +315,15 @@ const Checkout = (props) => {
   const renderShipments = shipments => {
     const shipmentArray = shipments.map(shipment => {
       return (
-        <div className={styles.shipment} key={shipment.shipmentId}>
+        <li 
+          className={styles.shipment} 
+          key={shipment.shipmentId} 
+          aria-label={'postage rates for ' + shipment.productName}>
           <h4>{shipment.productName}</h4>
           <ul className={styles.rateList}>
             {renderPostageRates(shipment.rates, shipment.shipmentId)}
           </ul>
-        </div>
+        </li>
       )
     })
 
@@ -405,21 +410,24 @@ const Checkout = (props) => {
     if(order.addressConfirmed && !order.postageConfirmed) {
       return (
         <>
-          <label htmlFor="">Select postage for individual items</label>
-          {renderShipments(order.shipments)}
+          <label htmlFor='select-postage-rates'>
+            Select postage for each item or choose the cheapest postage for all items
+          </label>
+          <ul id='select-postage-rates'>
+            {renderShipments(order.shipments)}
+          </ul>
           <div className={styles.confirmPostage}>
             <button 
               className={loading ? 'disabled': null} 
               disabled={loading} 
               onClick={(event) => confirmPostageRates(event, false)}>
-              Confirm
+              Confirm selected postage rates
             </button>
-            <p>Or</p>
             <button 
               className={loading ? 'disabled': null} 
               onClick={(event) => confirmPostageRates(event, true)} 
               disabled={loading}>
-              Select cheapest postage for all items
+              Confirm cheapest postage for all items
             </button>
           </div>
         </>
@@ -443,7 +451,7 @@ const Checkout = (props) => {
             <button 
               className={styles.remove} 
               onClick={() => removeProduct(product._id, token, userId, props.orderId)}>
-              Remove
+              Remove Product
             </button>
           : null }
         </li>
@@ -460,61 +468,68 @@ const Checkout = (props) => {
     <main>
       { loading ? <Loading msg={loadingMsg}/> : null}
       { order ? 
-        <div className={styles.checkout} key={order._id}>
+        <div className={styles.checkout} key={order._id} aria-label='checkout'>
           <h3 className={styles.header}>
             <span>Order Id: {order._id}</span>
           </h3>
-          <ul className={styles.products} >
+          <ul className={styles.products} aria-label='products'>
             {renderProducts(order.products)}
           </ul>
           <h3 className={styles.header}>Delivery Address</h3>
           { !order.addressConfirmed ? 
-            <form className={styles.address}>
+            <form className={styles.address} aria-live='polite'>
               <div>
-                <label htmlFor="">Street</label>
+                <label htmlFor="street">Street</label>
                 <input 
                   type="text"
+                  id='street'
                   value={street}
                   onChange={(event) => setStreet(event.target.value)}/>
               </div>
               <div>
-                <label htmlFor="">Apt/Unit</label>
+                <label htmlFor="apt">Apt/Unit</label>
                 <input 
                   type="text"
+                  id='apt'
                   value={aptUnit}
                   onChange={(event) => setAptUnit(event.target.value)}/>
               </div>
               <div>
-                <label htmlFor="">City</label>
+                <label htmlFor="city">City</label>
                 <input 
                   type="text"
+                  id='city'
                   value={city}
                   onChange={(event) => setCity(event.target.value)}/>
               </div>
               <div>
-                <label htmlFor="">State/Province</label>
+                <label htmlFor="state">State/Province</label>
                 <input 
                   type="text"
+                  id='state'
                   value={state}
                   onChange={(event) => setState(event.target.value)}/>
               </div>
               <div>
-                <label htmlFor="">Country</label>
+                <label htmlFor="country">Country</label>
                 <input 
                   type="text"
+                  id='country'
                   value={country}
                   onChange={(event) => setCountry(event.target.value)}/>
               </div>
               <div>
-                <label htmlFor="">Zip/Postcode</label>
+                <label htmlFor="postcode">Zip/Postcode</label>
                 <input 
+                  id='postcode'
                   type="text"
                   value={zipPostcode}
                   onChange={(event) => setZipPostcode(event.target.value)}/>
               </div>
               <div>
-                <label htmlFor="">Phone Number</label>
+                <label htmlFor="phone-number">Phone Number</label>
                 <input 
+                  id='phone-number'
                   type="text"
                   value={phoneNumber}
                   onChange={(event) => setPhoneNumber(event.target.value)}/>
@@ -528,7 +543,7 @@ const Checkout = (props) => {
             </form>
           : <p className={styles.addressConfirmed}>Address Confirmed</p> }
           <h3 className={styles.header}>Postage</h3>
-          <form className={styles.selectPostage}>
+          <form className={styles.selectPostage} aria-live='polite'>
             {renderPostageOptions(order, loading)}
           </form>
           <h3 className={styles.header}>Summary</h3>
@@ -546,7 +561,8 @@ const Checkout = (props) => {
           <h3 className={styles.header}>Complete Payment</h3>
           <form 
             onSubmit={(event) => handlePayment(event, order.customerName, props.user.token, order._id)} 
-            className={styles.payment}>
+            className={styles.payment}
+            aria-label='enter card details'>
             <CardElement options={cardElementOptions} />
             <button className={
               loading || !order.postageConfirmed ?

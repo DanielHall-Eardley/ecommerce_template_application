@@ -1,21 +1,25 @@
 .select {
   display: flex;
-  height: 7vh;
+  height: 5rem;
   margin-right: var(--spacing-md);
   margin-left: var(--spacing-md);
   margin-top: var(--spacing-md);
 }
 
-.select span {
+.select button {
   flex: 1;
+  height: 100%;
   font-size: var(--font-md);
   display: flex;
   align-items: center;
   justify-content: center;
   border: var(--bdr-pink);
+  background-color: transparent;
+  color: var(--pink);
+  border-radius: 0;
 }
 
 .selected {
-  background-color: var(--pink);
-  color: var(--white);
+  background-color: var(--pink) !important;
+  color: var(--white) !important;
 }

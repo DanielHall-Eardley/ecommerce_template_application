@@ -13,11 +13,9 @@ import {
   clearError,
 } from '../../actions/notification'
 import {addProduct} from '../../actions/product'
-import api from '../../helper/api'
-import {uuid} from 'uuidv4'
 
+import {uuid} from 'uuidv4'
 import Photos from './Photos'
-import {apiHost} from '../../global.js'
 
 
 /*This component is responsible for creating, updating
@@ -27,37 +25,38 @@ const AddEditProduct = props => {
   const {productId} = useParams()
   const navigate = useHistory()
   const path = location.pathname.split('/')[2]
-
   const [title, setTitle] = useState('Add Product')
+
+  const getProduct = async (productId) => {
+    const response = await props.getApi('/product/detail/' + productId)
+    
+    const oldProduct = response.product
+    setName(oldProduct.name)
+    setPrice(oldProduct.price)
+    setSpecialPrice(oldProduct.specialPrice)
+    setDescription(oldProduct.description)
+    setSpecifications(oldProduct.specifications)
+  }
+
 
   /*If this component is reached via 'product/update'
   the product is retrieved from the database and updatable 
   fields in the form are populated with existing product values*/
-  const useEffectCb = () => {
-    if (path === 'update' && productId) {
-      setTitle('Update Product')
-  
-      const getProduct = async (productId) => {
-        const res = await fetch(apiHost + '/product/detail/' + productId)
-        const response = await res.json()
-  
-        if (response.error) {
-          return displayError(response.error)
-        }
-        
-        const oldProduct = response.product
-        setName(oldProduct.name)
-        setPrice(oldProduct.price)
-        setSpecialPrice(oldProduct.specialPrice)
-        setDescription(oldProduct.description)
-        setSpecifications(oldProduct.specifications)
+  useEffect(() => {
+    props.clearError()
+    const result = props.checkLogin()
+
+    if (result.error) {
+      props.displayError(result.error)
+    } else if (result.user.type !== 'admin') {
+      props.displayError('Only business admin can modify or create products')
+    } else {
+      if (path === 'update' && productId) {
+        setTitle('Update Product')
+        getProduct(productId)
       }
-  
-      getProduct(productId)
     }
-  }
-  
-  useEffect(useEffectCb, [])
+  }, [])
   
   const [specificationArray, setSpecifications] = useState([])
   const [name, setName] = useState('')
@@ -134,20 +133,15 @@ const AddEditProduct = props => {
       s3PhotoInfo.push(s3FileUpload)
     }
 
-    const photos = JSON.stringify({
+    const photos = {
       s3PhotoInfo
-    })
-
-    const response = await api('/product/s3-signatures', photos, {
-      'Authorization': props.token,
-      'Content-Type': 'application/json'
-    }, 'POST')
-  
-    if (response.error) {
-      return props.displayError(response.error)
     }
 
-    savePhotosToS3(response.signatures)
+    const response = await props.authApi('/product/s3-signatures', props.token, photos, 'POST', props.displayError)
+  
+    if (response) {
+      savePhotosToS3(response.signatures)
+    }
   }
 
 
@@ -224,19 +218,11 @@ const AddEditProduct = props => {
       method = 'POST'
     }
 
-    const headers = {
-      'Authorization': token,
-      'Content-Type': 'application/json'
-    }
-    const stringifiedProduct = JSON.stringify(product)
-
-    const response = await api(url, stringifiedProduct, headers, method)
+    const response = await props.authApi(url, props.token, product, method, props.displayError)
   
-    if (response.error) {
-      return props.displayError(response.error)
+    if (response) {
+      navigate.push('/product/detail/' + response.product._id)
     }
-    
-    navigate.push('/product/detail/' + response.product._id)
   }
 
   
@@ -256,7 +242,9 @@ const AddEditProduct = props => {
         onSubmit={(event) => saveProduct(event, productId, props.token)}
         encType='multipart/form-data'>
         <label htmlFor='input-product-name'>Enter Product Name</label>
-        <input 
+        <input
+          required 
+          aria-required='true'
           id='input-product-name'
           className={styles.input}
           type="text" 
@@ -264,6 +252,8 @@ const AddEditProduct = props => {
           onChange={event => setName(event.target.value)} />
         <label htmlFor='input-product-price'>Enter Price</label>
         <input 
+          required
+          aria-required='true'
           id='input-product-price'
           className={styles.input}
           type="number"
@@ -272,6 +262,8 @@ const AddEditProduct = props => {
           onChange={event => setPrice(event.target.value)} />
         <label htmlFor='input-product-special-price'>Enter Special Price</label>
         <input 
+          required
+          aria-required='true'
           id='input-product-special-price'
           className={styles.input}
           step='any'
@@ -280,6 +272,8 @@ const AddEditProduct = props => {
           onChange={event => setSpecialPrice(event.target.value)} />
         <label htmlFor='input-product-description'>Enter Product Description</label>
         <textarea 
+          required
+          aria-required='true'
           id='input-product-description'
           className={styles.textarea}
           type="text" 
@@ -327,6 +321,8 @@ const AddEditProduct = props => {
             <div>
               <label htmlFor='input-product-weight'>Enter Product Weight in ounces</label>
               <input 
+                required
+                aria-required='true'
                 id='input-product-weight'
                 className={styles.input}
                 step='any'
@@ -337,6 +333,8 @@ const AddEditProduct = props => {
             <div>
               <label htmlFor='input-product-length'>Enter Product Length in inches</label>
               <input 
+                required
+                aria-required='true'
                 id='input-product-length'
                 className={styles.input}
                 step='any'
@@ -347,6 +345,8 @@ const AddEditProduct = props => {
             <div>
               <label htmlFor='input-product-width'>Enter Product Width in inches</label>
               <input 
+                required
+                aria-required='true'
                 id='input-product-width'
                 className={styles.input}
                 step='any'
@@ -357,6 +357,8 @@ const AddEditProduct = props => {
             <div>
               <label htmlFor='input-product-height'>Enter Product Height in inches</label>
               <input 
+                required
+                aria-required='true'
                 id='input-product-height'
                 className={styles.input}
                 step='any'

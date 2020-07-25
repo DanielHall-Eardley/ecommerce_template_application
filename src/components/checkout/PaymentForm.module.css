@@ -1,0 +1,11 @@
+.payment {
+  padding: var(--spacing-md);
+}
+
+.payment button {
+  margin-top: var(--spacing-sm);
+}
+
+.payment button:last-child {
+  margin-left: var(--spacing-sm);
+}

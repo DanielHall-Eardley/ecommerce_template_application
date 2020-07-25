@@ -2,7 +2,6 @@ import React, {useState} from 'react'
 import styles from './Signup.module.css'
 import '../../Global.css'
 import {useLocation, useHistory} from 'react-router-dom'
-import api from '../../helper/api'
 import {connect} from 'react-redux'
 import {
   displayError, 
@@ -24,25 +23,19 @@ const Signup = (props) => {
     props.clearNotification()
     props.clearError()
 
-    const headers = {
-      'Content-Type': 'application/json'
-    }
-
-    const body = JSON.stringify({
+    const body = {
       name,
       password,
       email,
       userId: props.userId
-    })
-
-    const response = await api(location.pathname, body, headers, 'POST')
-
-    if (response.error) {
-      return props.displayError(response.error)
     }
 
-    props.displayNotification(response.message)
-    navigate.push('/login')
+    const response = await props.postApi(location.pathname, body, props.displayError)
+
+    if (response) {
+      props.displayNotification(response.message)
+      navigate.push('/login')
+    }
   }
 
   return (

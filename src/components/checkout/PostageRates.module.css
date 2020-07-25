@@ -1,0 +1,53 @@
+.rateList {
+  list-style: none;
+  padding: var(--spacing-sm);
+}
+
+.rateList li {
+  padding: 1rem;
+  border: var(--bdr-light);
+  border-radius: var(--bdr-rad);
+}
+
+.rateList li button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  background-color: transparent;
+  color: var(--charcoal);
+}
+
+.rateList li:not(:last-child) {
+  margin-bottom: var(--spacing-sm);
+}
+
+.fee {
+  margin-right: var(--spacing-lg);
+}
+
+.selected {
+  background-color: var(--light-grey) !important;
+}
+
+@media screen and (max-width: 550px) { 
+  .rateList li button {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rateList li button {
+    height: auto;
+  }
+
+
+  .rateList li button * {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .carrierAndFee {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+}

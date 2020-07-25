@@ -1,17 +1,27 @@
+import 'react-app-polyfill/ie11'
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import {Provider} from 'react-redux'
 import store from './store'
 
+import checkLogin from './helper/checkLogin'
+import getOrderSummary from './helper/getOrderSummary'
+
+import {Elements} from '@stripe/react-stripe-js'
+import {loadStripe} from '@stripe/stripe-js'
+import {stripeApiKey} from './global'
+const stripePromise = loadStripe(stripeApiKey)
+
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App/>
+      <Elements stripe={stripePromise}>
+        <App checkLogin={checkLogin} getOrderSummary={getOrderSummary}/>
+      </Elements>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

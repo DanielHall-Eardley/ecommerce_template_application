@@ -1,106 +1,36 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import './Global.css';
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  useHistory
-} from "react-router-dom";
-import {apiHost} from './global'
-
-import Checkout from './components/checkout/Checkout.js'
-import Menu from './components/header/Menu.js'
-import Title from './components/header/Title.js'
-import Landing from './components/landing/Landing.js'
-import Signup from './components/user/Signup.js'
-import Login from './components/user/Login.js'
-import ProductPage from './components/products/ProductPage.js'
-import OrderList from './components/orders/OrderList.js'
-import Notification from './components/notification/Notification'
 
 import {connect} from 'react-redux'
 import {storeUser, clearUser} from './actions/user'
 import {storeOrderSummary} from './actions/order'
 import {displayError, clearError} from './actions/notification'
-import { Elements } from '@stripe/react-stripe-js';
-import {loadStripe} from '@stripe/stripe-js'
-import checkLogin from './helper/checkLogin'
-import {stripeApiKey} from './global'
-const stripePromise = loadStripe(stripeApiKey)
 
-/*This component functions as a root level navigator
-and retrieves user specific information on the 
-application's initial load*/
-const App = props => {
-  const getOrderSummary = async (userId, token) => {
-    const res = await fetch(apiHost + '/order/summary/' + userId, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token
-      }
-    }, [])
+import Navigation from './components/navigation/Navigation'
 
-    const response = await res.json()
-
-    if (!response.error) {
-      props.storeOrderSummary(response)
-    }
-  }
-
-  
-  useEffect(() => {
+/*This component functions retrieves user specific 
+information on the application's initial load*/
+export const App = props => {
+  React.useEffect(() => {
     props.clearError()
     
-    const result = checkLogin()
+    const result = props.checkLogin()
     
     if (result.error) {
       props.clearUser()
+      props.displayError(result.error)
     } else {
       props.storeUser(result.user)
     }
     
     if (result.user) {
       if (result.user.type === 'customer') {
-        getOrderSummary(result.user.userId, result.user.token)
+        props.getOrderSummary(result.user.userId, result.user.token, props.storeOrderSummary, fetch)
       }
     }
   }, [])
 
-  return (
-    <Router>
-      <header>
-        <Title title='Ecommerce Demo Website'/>
-        <Menu/>
-      </header>
-      <span id='main-content'></span>
-      <Notification error={props.error} notification={props.notification}/> 
-      <Switch>
-        <Route path='/order'>
-          <OrderList/>
-        </Route>
-        <Route path='/product'>
-          <ProductPage/>
-        </Route>
-        <Route path='/checkout'>
-          <Elements stripe={stripePromise}>
-            <Checkout/>
-          </Elements>
-        </Route>
-        <Route path='/user/signup'>
-          <Signup/>
-        </Route>
-        <Route path='/admin/signup'>
-          <Signup/>
-        </Route>
-        <Route path='/login'>
-          <Login/>
-        </Route>
-        <Route exact={true} path='/'>
-          <Landing/>
-        </Route>
-      </Switch>
-    </Router>
-  );
+  return <Navigation {...props}/>
 }
 
 const mapStateToProps = state => {
@@ -109,7 +39,6 @@ const mapStateToProps = state => {
     notification: state.notification.notification,
   }
 }
-
 
 const mapDispatchToProps = dispatch => {
   return {

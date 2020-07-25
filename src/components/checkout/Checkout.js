@@ -1,16 +1,4 @@
-import React from 'react'
-import {
-  CardElement, 
-  useStripe, 
-  useElements, 
-} from '@stripe/react-stripe-js'
-
-import styles from './Checkout.module.css'
-import {useEffect, useState} from 'react'
-
-import api from '../../helper/api'
-import {apiHost} from '../../global'
-import {useHistory} from 'react-router-dom'
+import React, {useState} from 'react'
 
 import {connect} from 'react-redux'
 import {
@@ -22,29 +10,23 @@ import {
 import {storeOrder, clearOrder} from '../../actions/order'
 import {storeUser, clearUser} from '../../actions/user'
 
-import checkLogin from '../../helper/checkLogin'
+import detectCssSupport from '../../helper/detectCssSupport'
 import Loading from './Loading'
 
-//stripe configuration options
-const cardElementOptions = {
-  style: {
-    base: {
-      color: "#32325d",
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-      fontSmoothing: "antialiased",
-      fontSize: "1.3rem",
-      "::placeholder": {
-        color: "#aab7c4",
-      },
-    },
-    invalid: {
-      color: "#fa755a",
-      iconColor: "#fa755a",
-    },
-  },
-};
+import PostageContainer from './PostageContainer'
+import ProductSummary from './ProductSummary'
+import CheckoutSummary from './CheckoutSummary'
+import PaymentForm from './PaymentForm'
 
-const Checkout = (props) => {
+import defaultStyles from './Checkout.module.css'
+import fallBackStyles from './CheckoutFallback.module.css'
+let styles = defaultStyles
+
+if (!detectCssSupport()) {
+  styles = fallBackStyles
+}
+
+export const Checkout = props => {
   const [clientSecret, setSecret] = useState(null)
   const [street, setStreet] = useState('')
   const [aptUnit, setAptUnit] = useState('')
@@ -58,112 +40,37 @@ const Checkout = (props) => {
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
 
-  const stripe = useStripe()
-  const elements = useElements()
-  const navigate = useHistory()
-
   
   /*This function makes a request to the api to retrieve the current order*/
-  const getOrderSummary = async (headers, userId, orderId) => {
-    const res = await fetch(apiHost + `/checkout/summary/${orderId}/${userId}`, {
-      headers
-    })
+  const getCheckoutSummary = async (errorHandler, userId, orderId, token) => {
+    const url  = `/checkout/summary/${orderId}/${userId}`
+    const response = await props.getAuthApi(url, token, errorHandler)
 
-    const response = await res.json()
-    
-    if (response.error) {
-      props.displayError(response.error)
+    if (response) {
+      props.storeOrder(response.order)
+      setSecret(response.clientSecret)
     }
-
-    props.storeOrder(response.order)
-    setSecret(response.clientSecret)
   }
 
-  
   /*This function checks if a user is logged in. 
   If a current order exists and the user is of type: customer,
   the getOrderSummary function is called*/
-  useEffect(() => {
+  React.useEffect(() => {
     props.clearError()
     
-    const result = checkLogin()
+    const result = props.checkLogin()
 
     if (result.error) {
       props.clearUser()
-      return props.displayError(result.error)
-    }
-    
-    props.storeUser(result.user)
+      props.displayError(result.error)
+    } else {
+      props.storeUser(result.user)
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': props.user.token
-    }
-
-    if(props.user.type === 'customer' && props.orderId) {
-      getOrderSummary(headers, props.user.userId, props.orderId)
-    }
-  }, [props.user.token, props.orderId])
-
-  
-  /*This function handles the processing the payment after
-  the customer has confirmed their card details. If the payment 
-  is successful the order is updated in the database and moved
-  from the checkout to the next stage of processing*/
-  const handlePayment = async (event, clientName, token, orderId) => {
-    event.preventDefault()
-    props.clearError()
-    props.clearNotification()
-
-    //Activate a screen overlay to prevent user interaction during processing
-    setLoading(true)
-    setLoadingMsg('Processing your payment, please do not navigate away from this page')
-
-    if (!stripe || !elements) {
-      return setLoading(false)
-    }
-    
-    
-    /*Confirm payment using the client secret 
-    which represents a payment that was created when 
-    the postage rates were confirmed*/
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-        billing_details: {
-          name: clientName
-        }
+      if(result.user.type === 'customer' && props.rderId) {
+        getCheckoutSummary(props.displayError, result.user.userId, props.orderId, result.user.token)
       }
-    })
-    
-    if (result.error) {
-      setLoading(false)
-      return props.displayError(result.error.message)
-    }
-
-    if (result.paymentIntent.status === "succeeded") {
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': token
-      }
-  
-      const body = JSON.stringify({
-        paymentId: result.paymentIntent.id,
-        clientSecret: result.paymentIntent.client_secret,
-        orderId: orderId
-      })
-      
-      const response = await api('/checkout/confirm/payment', body, headers, 'PUT')
-  
-      if (response.error) {
-        setLoading(false)
-        return displayError(response.error)
-      }
-
-      setLoading(false)
-      navigate.push('/order')
-    }  
-  }
+    } 
+  }, [props.orderId])
 
   
   /*This function removes the selected product from the order
@@ -171,25 +78,18 @@ const Checkout = (props) => {
   to update redux state*/
   const removeProduct = async (productId, token, userId, orderId) => {
     props.clearError()
-    
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': token
-    }
 
-    const body = JSON.stringify({
+    const body = {
       productId: productId,
       userId: userId,
       orderId: orderId
-    })
-    
-    const response = await api('/checkout/remove-product', body, headers, 'PUT')
-
-    if (response.error) {
-      return displayError(response.error)
     }
+    
+    const response = await props.authApi('/checkout/remove-product', token, body, 'PUT', props.displayError)
 
-    props.storeOrder(response)
+    if (response) {
+      props.storeOrder(response)
+    }
   }
 
   
@@ -231,13 +131,8 @@ const Checkout = (props) => {
     props.clearError()
     setLoading(true)
     setLoadingMsg('Checking delivery address')
-    
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': props.user.token
-    }
 
-    const body = JSON.stringify({
+    const body = {
       userId: props.user.userId,
       orderId: props.orderId,
       street,
@@ -247,115 +142,18 @@ const Checkout = (props) => {
       country,
       zipPostcode,
       phoneNumber
-    })
-    
-    const response = await api('/checkout/postage-rates', body, headers, 'POST')
-    
-    if (response.error) {
-      setLoading(false)
-      return displayError(response.error)
     }
+    
+    const response = await props.authApi('/checkout/postage-rates', props.token, body, 'POST', props.displayError)
+    
+    if (response) {
+      props.storeOrder(response)
+    } 
 
-    props.storeOrder(response)
     setLoading(false)
     setLoadingMsg('')
   }
 
-
-  /*This function checks if an individual postage rate 
-  is selected and returns a boolean that is used to 
-  conditionally add or remove a highlight class*/
-  const checkIfSelected = (rateId, shipmentId, selectedRates) => {
-    const shipmentIndex = selectedRates.findIndex(rate => rate.shipmentId === shipmentId)
-    
-    if (shipmentIndex === -1) {
-      return false
-    }
-
-    if (selectedRates[shipmentIndex].rateId === rateId) {
-      return true
-    }
-
-    return false
-  }
-
-
-  const renderPostageRates = (rates, shipmentId) => {
-    const rateArray = rates.map(rate => {
-      return (
-        <li key={rate.rateId}
-          className={
-            checkIfSelected(rate.rateId, shipmentId, selectedRates) ?
-            styles.selected :
-            null
-          }>
-          <button 
-            aria-label='select postage rate'
-            onClick={(event) => updatePostageRate(event, rate.rateId, shipmentId)}>
-            <span>
-              { !rate.guaranteedDeliveryTime ? 
-                `Estimated delivery time: ${rate.deliveryTime} days` :
-                `Guaranteed delivery in: ${rate.deliveryTime} days`
-              }
-            </span>
-            <span>{rate.serviceName}</span>
-            <div className={styles.carrierAndFee}>
-              <span className={styles.fee}>${rate.fee}</span>
-              <span>{rate.carrier}</span>
-            </div>
-          </button>
-        </li>
-      )
-    })
-
-    return rateArray
-  }
-
-  
-  const renderShipments = shipments => {
-    const shipmentArray = shipments.map(shipment => {
-      return (
-        <li 
-          className={styles.shipment} 
-          key={shipment.shipmentId} 
-          aria-label={'postage rates for ' + shipment.productName}>
-          <h4>{shipment.productName}</h4>
-          <ul className={styles.rateList}>
-            {renderPostageRates(shipment.rates, shipment.shipmentId)}
-          </ul>
-        </li>
-      )
-    })
-
-    return shipmentArray
-  }
-
-
-  //Delete the order, which will empty the cart
-  const cancelOrder = async (event, orderId, userId, token) => {
-    event.preventDefault()
-    props.clearError()
-    
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': token
-    }
-
-    const body = JSON.stringify({
-      userId: userId,
-      orderId: orderId,
-    })
-    
-    const response = await api('/checkout/cancel-order', body, headers, 'DELETE')
-    
-    if (response.error) {
-      return props.displayError(response.error)
-    }
-
-    props.displayNotification(response.msg)
-    props.clearOrder()
-    navigate.push('/')
-  }
 
   /*This function sends the selected postage rates to update the
   order in the database or if 'cheapest postage' is selected, the
@@ -373,114 +171,44 @@ const Checkout = (props) => {
       rates = null
     }
     
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': props.user.token
-    }
-
-    const body = JSON.stringify({
+    const body = {
       userId: props.user.userId,
       orderId: props.orderId,
       selectedRates: rates
-    })
-    
-    const response = await api('/checkout/confirm/postage-rates', body, headers, 'POST')
-    
-    if (response.error) {
-      setLoading(false)
-      return displayError(response.error)
     }
     
-    props.storeOrder(response.order)
-    setSecret(response.clientSecret)
+    const response = await props.authApi('/checkout/confirm/postage-rates', props.token, body, 'POST', props.displayError)
+    
+    if (response) {
+      props.storeOrder(response.order)
+      setSecret(response.clientSecret)
+    }
     setLoading(false)
     setLoadingMsg('')
   }
 
-  
-  /*This component renders three different states based on 
-  the current checkout progress. The three different state are:
-  before address confirmation, select postage rates and postage 
-  rates confirmed*/
-  const renderPostageOptions = (order, loading) => {
-    if (!order.addressConfirmed && !order.postageConfirmed) {
-      return <span>Confirm your address to calculate postage</span> 
-    }
-
-    if(order.addressConfirmed && !order.postageConfirmed) {
-      return (
-        <>
-          <label htmlFor='select-postage-rates'>
-            Select postage for each item or choose the cheapest postage for all items
-          </label>
-          <ul id='select-postage-rates'>
-            {renderShipments(order.shipments)}
-          </ul>
-          <div className={styles.confirmPostage}>
-            <button 
-              className={loading ? 'disabled': null} 
-              disabled={loading} 
-              onClick={(event) => confirmPostageRates(event, false)}>
-              Confirm selected postage rates
-            </button>
-            <button 
-              className={loading ? 'disabled': null} 
-              onClick={(event) => confirmPostageRates(event, true)} 
-              disabled={loading}>
-              Confirm cheapest postage for all items
-            </button>
-          </div>
-        </>
-      )
-    }
-
-    if (order.addressConfirmed && order.postageConfirmed) {
-      return <span>Postage confirmed</span>
-    }
-  }
-
-  
-  const renderProducts = productArray => {
-    const products = productArray.map((product, index) => {
-      return (
-        <li key={product._id + index} className={styles.productItem}>
-          <span>Product Id: {product._id}</span>
-          <span>Name: {product.name}</span>
-          <span className={styles.price}>${product.price}</span>
-          { !order.addressConfirmed ?
-            <button 
-              className={styles.remove} 
-              onClick={() => removeProduct(product._id, token, userId, props.orderId)}>
-              Remove Product
-            </button>
-          : null }
-        </li>
-      )
-    })
-
-    return products
-  }
-
   const {order} = props
-  const { token, userId } = props.user
 
   return (
-    <main>
+    <main aria-busy={loading}>
       { loading ? <Loading msg={loadingMsg}/> : null}
       { order ? 
         <div className={styles.checkout} key={order._id} aria-label='checkout'>
           <h3 className={styles.header}>
             <span>Order Id: {order._id}</span>
           </h3>
-          <ul className={styles.products} aria-label='products'>
-            {renderProducts(order.products)}
-          </ul>
+          <ProductSummary 
+            order={order} 
+            user={props.user} 
+            removeProduct={removeProduct}/>
           <h3 className={styles.header}>Delivery Address</h3>
           { !order.addressConfirmed ? 
-            <form className={styles.address} aria-live='polite'>
+            <form className={styles.address} aria-live='assertive'>
               <div>
                 <label htmlFor="street">Street</label>
                 <input 
+                  required
+                  aria-required='true'
                   type="text"
                   id='street'
                   value={street}
@@ -497,6 +225,8 @@ const Checkout = (props) => {
               <div>
                 <label htmlFor="city">City</label>
                 <input 
+                  required
+                  aria-required='true'
                   type="text"
                   id='city'
                   value={city}
@@ -505,6 +235,8 @@ const Checkout = (props) => {
               <div>
                 <label htmlFor="state">State/Province</label>
                 <input 
+                  required
+                  aria-required='true'
                   type="text"
                   id='state'
                   value={state}
@@ -513,6 +245,8 @@ const Checkout = (props) => {
               <div>
                 <label htmlFor="country">Country</label>
                 <input 
+                  required
+                  aria-required='true'
                   type="text"
                   id='country'
                   value={country}
@@ -520,7 +254,9 @@ const Checkout = (props) => {
               </div>
               <div>
                 <label htmlFor="postcode">Zip/Postcode</label>
-                <input 
+                <input  
+                  required
+                  aria-required='true'
                   id='postcode'
                   type="text"
                   value={zipPostcode}
@@ -528,13 +264,16 @@ const Checkout = (props) => {
               </div>
               <div>
                 <label htmlFor="phone-number">Phone Number</label>
-                <input 
+                <input  
+                  required
+                  aria-required='true'
                   id='phone-number'
                   type="text"
                   value={phoneNumber}
                   onChange={(event) => setPhoneNumber(event.target.value)}/>
               </div>
               <button 
+                id='checkout-confirm-address'
                 className={loading ? 'disabled': null} 
                 onClick={getPostageRates}
                 disabled={loading}>
@@ -543,38 +282,24 @@ const Checkout = (props) => {
             </form>
           : <p className={styles.addressConfirmed}>Address Confirmed</p> }
           <h3 className={styles.header}>Postage</h3>
-          <form className={styles.selectPostage} aria-live='polite'>
-            {renderPostageOptions(order, loading)}
-          </form>
+          <PostageContainer  
+            order={order} 
+            loading={loading} 
+            confirmPostageRates={confirmPostageRates}
+            selectedRates={selectedRates}
+            updatePostageRate={updatePostageRate}
+            />
           <h3 className={styles.header}>Summary</h3>
-          <div className={styles.summary}>
-            <span>
-              Postage: {
-              !order.postageTotal ? 
-              'Confirm postage options' : 
-              '$' + order.postageTotal
-              }
-            </span>
-            <span>Amount of items: {order.count}</span>
-            <span>Total: ${order.total}</span>
-          </div>
+          <CheckoutSummary order={order}/>
+          <PaymentForm
+            order={order} 
+            token={props.user.token}
+            clientSecret={clientSecret} 
+            loading={loading}
+            errorHandler={props.displayError}
+            setLoading={setLoading}
+            setLoadingMsg={setLoadingMsg}/>
           <h3 className={styles.header}>Complete Payment</h3>
-          <form 
-            onSubmit={(event) => handlePayment(event, order.customerName, props.user.token, order._id)} 
-            className={styles.payment}
-            aria-label='enter card details'>
-            <CardElement options={cardElementOptions} />
-            <button className={
-              loading || !order.postageConfirmed ?
-              'disabled': null
-              } 
-              disabled={loading || !order.postageConfirmed}>
-              Confirm Payment
-            </button>
-            <button onClick={(event) => cancelOrder(event, order._id, order.customerId, props.user.token)}>
-              Cancel Order
-            </button>
-          </form>
         </div> 
       : <p className={styles.fallBack}>Add items to cart to create order</p>}
     </main>

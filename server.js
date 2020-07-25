@@ -3,6 +3,7 @@ const app = express()
 const path = require('path')
 const env = require('dotenv')
 const mongoose = require('mongoose')
+const helmet = require('helmet')
 
 /*This is the root server component, It initializes the 
 server, connects to the database, registers url routes and
@@ -22,6 +23,8 @@ const userRoutes = require('./routes/userRoutes')
 const productRoutes = require('./routes/productRoutes')
 const orderRoutes = require('./routes/orderRoutes')
 const webhookRoutes = require('./routes/webhookRoutes')
+
+app.use(helmet())
 
 //Allows cors access
 app.use((req, res, next) => {

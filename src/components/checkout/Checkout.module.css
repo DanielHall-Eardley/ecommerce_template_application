@@ -12,36 +12,6 @@
   justify-content: space-between;
 }
 
-.products {
-  padding: var(--spacing-md);
-}
-
-.productItem, .summary {
-  padding: var(--spacing-sm);
-  border: var(--bdr-light);
-  border-radius: var(--bdr-rad);
-  font-size: var(--font-sm);
-  display: flex;
-  align-items: center;
-}
-
-.productItem span {
-  margin-right: var(--spacing-lg);
-}
-
-.price {
-  margin-left: auto;
-}
-
-.remove {
-  background-color: transparent;
-  color: var(--light-grey);
-}
-
-.productItem:not(:last-child) {
-  margin-bottom: var(--spacing-sm);
-}
-
 .address {
   padding: var(--spacing-md);
   display: grid;
@@ -58,89 +28,9 @@
   grid-row: 5 / 6;
 }
 
-.selectPostage, .addressConfirmed {
+.addressConfirmed {
   padding: var(--spacing-md);
   font-size: var(--font-sm);
-}
-
-.selectPostage label {
-  font-size: var(--font-sm);
-  font-weight: bold;
-}
-
-.shipment {
-  margin-bottom: var(--spacing-sm);
-  border: var(--bdr-pink);
-}
-
-.shipment h4 {
-  padding: .5rem;
-  background-color: var(--pink);
-  color: var(--white);
-}
-
-.rateList {
-  list-style: none;
-  padding: var(--spacing-sm);
-}
-
-.rateList li {
-  padding: 1rem;
-  border: var(--bdr-light);
-  border-radius: var(--bdr-rad);
-}
-
-.rateList li button {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
-  background-color: transparent;
-  color: var(--charcoal);
-}
-
-.rateList li:not(:last-child) {
-  margin-bottom: var(--spacing-sm);
-}
-
-.fee {
-  margin-right: var(--spacing-lg);
-}
-
-.selected {
-  background-color: var(--light-grey) !important;
-}
-
-.confirmPostage {
-  display: flex;
-  align-items: center;
-}
-
-.confirmPostage > *:not(:last-child) {
-  margin-right: var(--spacing-md);
-}
-
-.summary {
-  margin: var(--spacing-md);
-  display: flex;
-  justify-content: flex-end;
-  font-size: var(--font-sm);
-}
-
-.summary span {
-  margin-left: var(--spacing-lg);
-}
-
-.payment {
-  padding: var(--spacing-md);
-}
-
-.payment button {
-  margin-top: var(--spacing-sm);
-}
-
-.payment button:last-child {
-  margin-left: var(--spacing-sm);
 }
 
 .fallBack {
@@ -156,37 +46,10 @@
   .checkout {
     margin: var(--spacing-md);
   }
-
 }
 
 @media screen and (max-width: 550px) {
-  .productItem, 
-  .summary, 
-  .rateList li,
-  .confirmPostage {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .productItem *, .summary span {
-    margin-left: 0;
-    padding-left: 0;
-  }
-
-  .productItem *:not(:last-child), 
-  .summary span:not(:last-child),
-  .rateList li > span,
-  .confirmPostage *:not(:last-child) {
-    margin-bottom: var(--spacing-sm);
-  }
-
-  .carrierAndFee {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .address button {
+ .address button {
     grid-row: 8 / 9;
   }
 }

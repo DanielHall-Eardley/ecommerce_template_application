@@ -1,0 +1,29 @@
+.selectPostage {
+  padding: var(--spacing-md);
+  font-size: var(--font-sm);
+}
+
+.selectPostage label {
+  font-size: var(--font-sm);
+  font-weight: bold;
+}
+
+.confirmPostage {
+  display: flex;
+  align-items: center;
+}
+
+.confirmPostage > *:not(:last-child) {
+  margin-right: var(--spacing-md);
+}
+
+@media screen and (max-width: 550px) {
+  .confirmPostage {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .confirmPostage *:not(:last-child) {
+    margin-bottom: var(--spacing-sm);
+  }
+}

@@ -10,38 +10,27 @@ import {
   displayError,
   clearError
 } from '../../actions/notification'
-import {apiHost} from '../../global'
-import api from '../../helper/api'
-import checkLogin from '../../helper/checkLogin'
 
 import List from './List'
 
-const ProductDetail = props => {
+const OrderList = props => {
   const [selectedOrderList, setList] = useState('pending')
 
+  
   //Retrieve orders from database
   const getOrderList = async (userId, token) => {
-    const res = await fetch(`${apiHost}/order/list/${userId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token
-      }
-    })
-
-    const response = await res.json()
-
-    if (response.error) {
-      return props.displayError(response.error)
-    }
-
+    const url = `$/order/list/${userId}` 
+    const response = await props.getAuthApi(url, token, props.displayError)
+     
     if (
+      response &&
       response.past.length < 1 
       && (!response.pending || response.pending.length < 1)
-      ) {
-      return props.displayNotification('No orders found')
+    ) {
+      props.displayNotification('No orders yet..')
+    } else {
+      props.storeOrderList(response.past, response.pending)
     }
-    
-    props.storeOrderList(response.past, response.pending)
   }
 
   
@@ -50,64 +39,16 @@ const ProductDetail = props => {
     props.clearNotification()
     props.clearError()
     
-    const result = checkLogin()
+    const result = props.checkLogin()
 
     if (result.error) {
       props.clearUser()
-      return props.displayError(result.error)
+      props.displayError(result.error)
+    } else {
+      props.storeUser(result.user)
+      getOrderList(result.user.userId, result.user.token)
     }
-    
-    props.storeUser(result.user)
-
-    if (props.user.token) {
-      getOrderList(props.user.userId, props.user.token)
-    }
-  }, [props.user.token]) 
-
-
-  /*Buy the postage labels based on the postage rate
-  options the customer has selected*/
-  const buyLabels = async (orderId) => {
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': props.user.token
-    }
-
-    const body = JSON.stringify({
-      userId: props.user.userId,
-      orderId,
-    })
-    
-    const response = await api('/order/postage-label', body, headers, 'POST')
-    
-    if (response.error) {
-      return props.displayError(response.error)
-    }
-
-    props.storeOrderList(response.past, response.pending)
-  }
-
-  
-  /*Submit a api request to mark the order as fulfilled*/
-  const fulfillOrder = async (orderId) => {
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': props.user.token
-    }
-
-    const body = JSON.stringify({
-      userId: props.user.userId,
-      orderId,
-    })
-    
-    const response = await api('/order/fulfill', body, headers, 'PUT')
-
-    if (response.error) {
-      return props.displayError(response.error)
-    }
-
-    props.storeOrderList(response.past, response.pending)
-  }
+  }, []) 
 
   const toggleOrderTab = (event, tab) => {
     setList(tab)
@@ -143,9 +84,10 @@ const ProductDetail = props => {
       </div>
       <List 
         orderList={props[selectedOrderList + 'OrderList']} 
-        userType={props.user.type}
-        fulfillOrder={fulfillOrder}
-        buyLabels={buyLabels}/>
+        user={props.user}
+        clearError={clearError}
+        displayError={displayError}
+        storeOrderList={storeOrderList}/>
     </section>
   )
 }
@@ -173,4 +115,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(ProductDetail)
+)(OrderList)

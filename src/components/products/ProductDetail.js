@@ -10,10 +10,8 @@ import {
   displayNotification
 } from '../../actions/notification'
 import {useParams, Link, useHistory} from 'react-router-dom'
-import {apiHost} from '../../global'
-import api from '../../helper/api'
 import sprite from '../../sprite.svg'
-import checkKeyCode from '../../helper/checkKeyCode'
+
 
 /*This component shows the details for a selected
 product and allows product to be added to the cart*/
@@ -23,20 +21,18 @@ const ProductDetail = props => {
   const navigate = useHistory()
   props.clearError()
 
+  const getProduct = async (productId) => {
+    const response = await props.getApi('/product/detail/' + productId)
+
+    if (response) {
+      props.storeProduct(response.product) 
+    }
+  }
+    
+
   /*This function makes a request to the api to
   get the product details and stores them in redux state*/
   useEffect(() => {
-    const getProduct = async (productId) => {
-      const res = await fetch(apiHost + '/product/detail/' + productId)
-      const response = await res.json()
-
-      if (response.error) {
-        displayError(response.error)
-      } else {
-        props.storeProduct(response.product) 
-      }
-    }
-      
     getProduct(productId)
   }, [])
 
@@ -65,20 +61,16 @@ const ProductDetail = props => {
   If a current order already exists it will update it with the selected product */
   const addToCart = async (event, productId, userId, token) => {
     props.clearError()
-   
-    if (!token) {
-      return props.displayError('Please Log In')
+    
+    const result = props.checkLogin()
+    if (result.error) {
+      return props.displayError(result.error)
     }
 
     let url = '/order/update'
 
     if (!props.orderId) {
       url = '/order/create'
-    }
-
-    const headers = {
-      'Authorization': token,
-      'Content-Type': 'application/json'
     }
 
     const body = {
@@ -89,45 +81,35 @@ const ProductDetail = props => {
     if (url === '/order/update') {
       body.orderId = props.orderId
     }
-
-    const stringifiedBody = JSON.stringify(body)
     
-    const response = await api(url, stringifiedBody, headers, 'POST')
+    const response = await props.authApi(url, token, body, 'POST', props.displayError)
 
-    if (response.error) {
-      return props.displayError(response.error)
+    if (response) {
+      props.storeOrderSummary(response)
     }
-    
-    props.storeOrderSummary(response)
   }
 
   
   const deleteProduct = async (event, productId, userId, token) => {
     props.clearError()
    
-    if (!token) {
-      return props.displayError('Please Log In')
+    const result = props.checkLogin()
+    if (result.error) {
+      return props.displayError(result.error)
     }
 
-    const headers = {
-      'Authorization': token,
-      'Content-Type': 'application/json'
-    }
-
-    const body = JSON.stringify({
+    const body = {
       productId,
       userId: userId,
-    })
-    
-    const response = await api('/product/delete', body, headers, 'DELETE')
-
-    if (response.error) {
-      return props.displayError(response.error)
     }
     
-    props.removeProduct(productId)
-    props.displayNotification(response.msg)
-    navigate.push('/product')
+    const response = await props.authApi('/product/delete', token, body, 'DELETE', props.displayError)
+
+    if (response) {
+      props.removeProduct(productId)
+      props.displayNotification(response.msg)
+      navigate.push('/product')
+    }
   }
   
   /*Conditionally render a list of product specifications*/

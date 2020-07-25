@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react'
 import '../../Global.css'
 import {connect} from 'react-redux'
-import {apiHost} from '../../global'
 import {storeProductList} from '../../actions/product'
 import {
   displayError, 
@@ -19,22 +18,23 @@ import AddEditProduct from './AddEditProduct'
 import List from './List'
 import ProductDetail from './ProductDetail'
 
+import getApi from '../../helper/getApi'
+import authApi from '../../helper/authApi'
+import checkLogin from '../../helper/checkLogin'
+
 /*This component contains nested routes for creating, updating 
 and viewing the product list and individual product details */
 const ProductPage = props => {
-  useEffect(() => {
-    props.clearError()
+  const getProductList = async () => {
+    const response = await props.getApi('/product/list')
 
-    const getProductList = async () => {
-      const res = await fetch(apiHost + '/product/list')
-      const response = await res.json()
-
-      if (response.error) {
-        return props.displayError(response.error)
-      }
+    if (response) {
       props.storeProductList(response)
     }
-    
+  }
+
+  useEffect(() => {
+    props.clearError()
     getProductList()
   }, [])
  
@@ -48,13 +48,13 @@ const ProductPage = props => {
           <List/>
         </Route>
         <Route path={`${path}/create`}>
-          <AddEditProduct />
+          <AddEditProduct getApi={getApi} authApi={authApi} checkLogin={checkLogin}/>
         </Route>
         <Route path={`${path}/update/:productId`}>
-          <AddEditProduct />
+          <AddEditProduct getApi={getApi} authApi={authApi} checkLogin={checkLogin}/>
         </Route>
         <Route path={`${path}/detail/:id`}>
-          <ProductDetail />
+          <ProductDetail getApi={getApi} authApi={authApi} checkLogin={checkLogin}/>
         </Route>
       </Switch>
     </main>

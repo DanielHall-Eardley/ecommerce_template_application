@@ -1,0 +1,167 @@
+.checkout {
+  margin: 2rem 10vw;
+  border: solid 1.5px #f76ab3;;;
+}
+
+.header {
+  padding: .8rem;
+  background-color: #f76ab3;;
+  color: white;
+  font-size: 2.2rem;
+}
+
+.products {
+  padding: 2rem;
+}
+
+.productItem, .summary {
+  padding: .8rem;
+  border: solid 1px lightgrey;;
+  border-radius: 1rem;
+  font-size: 1.7rem;
+}
+
+.productItem span {
+  margin-right: 2.5rem;
+}
+
+.productItem:not(:last-child) {
+  margin-bottom: .8rem;
+}
+
+.address {
+  padding: 2rem;
+}
+
+.address div input {
+  width: 50%;
+  margin-bottom: 2rem;
+}
+
+.address button {
+  width: 125px;
+}
+
+.selectPostage, .addressConfirmed {
+  padding: 2rem;
+  font-size: 1.7rem;
+}
+
+.selectPostage label {
+  font-size: 1.7rem;
+  font-weight: bold;
+}
+
+.shipment {
+  margin-bottom: .8rem;
+  border: solid 1.5px #f76ab3;;;
+}
+
+.shipment h4 {
+  padding: .5rem;
+  background-color: #f76ab3;;
+  color: white;
+}
+
+.rateList {
+  list-style: none;
+  padding: .8rem;
+}
+
+.rateList li {
+  padding: 1rem;
+  border: solid 1px lightgrey;
+  border-radius: 1rem;
+}
+
+.rateList li button {
+  width: 100%;
+  background-color: transparent;
+  color: #262625;
+  text-align: start;
+}
+
+.rateList li button * {
+  display: inline-block;
+  margin-right: 5rem;
+}
+
+.rateList li:not(:last-child) {
+  margin-bottom: .8rem;
+}
+
+.fee {
+  margin-right: 2.5rem;
+}
+
+.selected {
+  background-color: lightgrey !important;
+}
+
+.confirmPostage > *:not(:last-child) {
+  margin-right: 2rem;
+}
+
+.summary {
+  margin: 2rem;
+  font-size: 1.7rem;
+}
+
+.summary span:not(:first-child) {
+  margin-left: 2.5rem;
+}
+
+.payment {
+  padding: 2rem;
+}
+
+.payment button {
+  margin-top: .8rem;
+}
+
+.payment button:last-child {
+  margin-left: .8rem;
+}
+
+.fallBack {
+  width: 100%;
+  padding: 2rem;
+  text-align: center;
+  background-color: lightblue;
+  color: grey;
+  font-size: 2.2rem;
+}
+
+@media screen and (max-width: 850px) {
+  .checkout {
+    margin: 2rem;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .productItem span, 
+  .summary span, 
+  .rateList li button * {
+    display: block;
+  }
+
+  .rateList li button {
+    height: auto;
+  }
+
+  .productItem *, .summary span {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .productItem *:not(:last-child), 
+  .summary span:not(:last-child),
+  .rateList li button *,
+  .confirmPostage *:not(:last-child) {
+    margin-bottom: .8rem;
+  }
+
+  .carrierAndFee, .address div input {
+    width: 100%
+  }
+}

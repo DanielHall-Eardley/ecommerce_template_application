@@ -2,53 +2,61 @@ import React from 'react'
 import styles from './List.module.css'
 import '../../Global.css'
 import {format} from 'date-fns'
+import ProductSummary from './ProductSummary'
 
-export default ({orderList, userType, fulfillOrder, buyLabels}) => {
-  let orderArray = orderList
+export default props => {
+  let orderArray = props.orderList
 
+  
   /*This needed because in some instances the server
   will return a single object instead of an array of objects*/
-  if (!Array.isArray(orderList)) {
+  if (!Array.isArray(props.orderList)) {
     orderArray = [orderArray]
   }
 
-  /*This component renders a shipment list for a business 
-  admin user and a product list for a customer user. Only the
-  shipment list contains the links to print the postage labels*/
-  const productOrShipmentList = (order, userType) => {
-    if (userType === 'admin' && !order.fulfilled) {
-      return order.shipments.map(shipment => {
-        return (
-          <li key={shipment.shipmentId} className={styles.productItem} aria-label='shipment'>
-            <span>Product Id: {shipment.productId}</span>
-            <span>Name: {shipment.productName}</span>
-            { shipment.postageLabel ?
-              <a href={shipment.postageLabel}>Print Label</a>
-            : null }  
-          </li>
-        )
-      })
-    } else {
-      return order.products.map(product => {
-        return (
-          <li key={product.name} className={styles.productItem} aria-label='product'>
-            <span>Product Id: {product._id}</span>
-            <span>Name: {product.name}</span>
-            <span>${product.price}</span>
-          </li>
-        )
-      })
+  
+  /*Buy the postage labels based on the postage rate
+  options the customer has selected*/
+  const buyLabels = async (orderId) => {
+    props.clearError()
+    const body = {
+      userId: props.user.userId,
+      orderId,
+    }
+    
+    const response = await props.authApi('/order/postage-label', props.user.token, body, 'POST', props.displayError)
+    
+    if (response) {
+      props.storeOrderList(response.past, response.pending)
+    }
+  }
+
+  
+  /*Submit a api request to mark the order as fulfilled*/
+  const fulfillOrder = async (orderId) => {
+    props.clearError()
+    const body = {
+      userId: props.user.userId,
+      orderId,
+    }
+    
+    const response = await props.authApi('/order/fulfill', props.user.token, body, 'PUT', props.errorHandler)
+
+    if (response) {
+      props.storeOrderList(response.past, response.pending)
     }
   }
   
-  
+  const userType = props.user.type
+
+
   /*Renders a list of orders. Certain functionality and information
   is only available to the business admin user, such as the ability
   to purchase postage and mark the order as fulfilled*/
-  const renderOrderList = (orders) => {
-    return orders.map(order => {
-      return (
-        <li className={styles.listItem} key={order._id}>
+  return (
+    <ul className={styles.container} aria-label='order'>
+      {orderArray.order.map(order => {
+        return <li className={styles.listItem} key={order._id}>
           <h3 className={styles.header}>
             <span>Order Id: {order._id}</span>
             <span>Status: {order.status}</span>
@@ -58,9 +66,7 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
               'Placed: ' + format(new Date(order.payment), "do MMM yyyy")}
             </span>
           </h3>
-          <ul className={styles.products} aria-label='product'>
-            {productOrShipmentList(order, userType)}
-          </ul>
+          <ProductSummary order={order} userType={userType}/>
           <ul className={styles.address} aria-label='address'>
             <li>Street: {order.customerAddress.street1}</li>
             <li>
@@ -93,13 +99,7 @@ export default ({orderList, userType, fulfillOrder, buyLabels}) => {
             <span>Total: {order.total}</span>
           </div>
         </li>
-      )
-    })
-  }
-
-  return (
-    <ul className={styles.container} aria-label='order'>
-      {renderOrderList(orderArray)}
+      })}
     </ul>
   )
 }

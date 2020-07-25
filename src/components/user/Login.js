@@ -1,7 +1,6 @@
 import React, {useState} from 'react'
 import styles from './Login.module.css'
 import '../../Global.css'
-import api from '../../helper/api'
 import {useHistory} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {
@@ -15,7 +14,6 @@ import {
   clearUser
 } from '../../actions/user'
 import {storeOrderSummary} from '../../actions/order'
-import {apiHost} from '../../global'
 
 /*This component logs in a user, saves a jwt token and
 basic user information to local storage. If the user is
@@ -27,52 +25,43 @@ const Login = (props) => {
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
 
+  const setLocalStorage = user => {
+    localStorage.setItem('token', user.token)
+    localStorage.setItem('userId', user.userId)
+    localStorage.setItem('name', user.name)
+    localStorage.setItem('type', user.type)
+    localStorage.setItem('tokenExpiration', user.tokenExpiration)
+  }
+
   const login = async (event) => {
     event.preventDefault()
     props.clearNotification()
     props.clearError()
     props.clearUser()
 
-    const headers = {
-      'Content-Type': 'application/json',
-    }
-
-    const body = JSON.stringify({
+    const body = {
       password,
       email
-    })
-
-    const loginResponse = await api('/user/login', body, headers, 'POST')
-
-    if (loginResponse.error) {
-      return props.displayError(loginResponse.error)
     }
+
+    const response = await props.postApi('/user/login', body, props.displayError)
+
+    if (response) {
+      displayNotification('Logged In!')
+      setLocalStorage(response.user)
+      props.storeUser(response.user)
+
+      if (response.user.type === 'customer') {
+        const url = '/order/summary/' + response.user.userId
+        const orderSummary = await props.getAuthApi(url, response.user.token, props.displayError)
     
-    displayNotification('Logged In!')
-    localStorage.setItem('token', loginResponse.user.token)
-    localStorage.setItem('userId', loginResponse.user.userId)
-    localStorage.setItem('name', loginResponse.user.name)
-    localStorage.setItem('type', loginResponse.user.type)
-    localStorage.setItem('tokenExpiration', loginResponse.user.tokenExpiration)
-
-    props.storeUser(loginResponse.user)
-
-    if (loginResponse.user.type === 'customer') {
-      const res = await fetch(apiHost + '/order/summary/' + loginResponse.user.userId, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': loginResponse.user.token
+        if (orderSummary) {
+          props.storeOrderSummary(orderSummary)
         }
-      }, [])
-  
-      const orderResponse = await res.json()
-  
-      if (!orderResponse.error) {
-        props.storeOrderSummary(orderResponse)
       }
-    }
-    
-    navigate.push('/product')
+      
+      navigate.push('/product')
+    }  
   }
 
   return (

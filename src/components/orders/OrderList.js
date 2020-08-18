@@ -19,7 +19,7 @@ const OrderList = props => {
   
   //Retrieve orders from database
   const getOrderList = async (userId, token) => {
-    const url = `$/order/list/${userId}` 
+    const url = `/order/list/${userId}` 
     const response = await props.getAuthApi(url, token, props.displayError)
      
     if (

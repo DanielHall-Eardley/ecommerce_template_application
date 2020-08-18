@@ -12,7 +12,7 @@ export default ({shipments, selectedRates, updatePostageRate}) => {
         <h4>{shipment.productName}</h4>
         <PostageRates 
           rates={shipment.rates} 
-          shipMentId={shipment.shipmentId}
+          shipmentId={shipment.shipmentId}
           selectedRates={selectedRates}
           updatePostageRate={updatePostageRate}/>
       </li>

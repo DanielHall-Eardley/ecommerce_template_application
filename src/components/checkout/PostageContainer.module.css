@@ -1,4 +1,4 @@
-.selectPostage {
+.selectPostage,  .text {
   padding: var(--spacing-md);
   font-size: var(--font-sm);
 }

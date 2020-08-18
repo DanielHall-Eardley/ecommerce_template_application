@@ -1,0 +1,26 @@
+.address {
+  padding: var(--spacing-md);
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+}
+
+.address div input {
+  width: 100%;
+}
+
+.address button {
+  width: 125px;
+  grid-row: 5 / 6;
+}
+
+.addressConfirmed {
+  padding: var(--spacing-md);
+  font-size: var(--font-sm);
+}
+
+@media screen and (max-width: 550px) {
+  .address button {
+     grid-row: 8 / 9;
+   }
+ }

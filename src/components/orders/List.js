@@ -13,7 +13,7 @@ export default props => {
   if (!Array.isArray(props.orderList)) {
     orderArray = [orderArray]
   }
-
+  
   
   /*Buy the postage labels based on the postage rate
   options the customer has selected*/
@@ -55,7 +55,7 @@ export default props => {
   to purchase postage and mark the order as fulfilled*/
   return (
     <ul className={styles.container} aria-label='order'>
-      {orderArray.order.map(order => {
+      {orderArray.map(order => {
         return <li className={styles.listItem} key={order._id}>
           <h3 className={styles.header}>
             <span>Order Id: {order._id}</span>

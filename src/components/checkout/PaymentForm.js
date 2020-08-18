@@ -7,6 +7,8 @@ import {
 } from '@stripe/react-stripe-js'
 
 import {useHistory} from 'react-router-dom'
+import {connect} from 'react-redux'
+import {displayError, clearError} from '../../actions/notification'
 
 
 //stripe configuration options
@@ -28,7 +30,7 @@ const cardElementOptions = {
   },
 };
 
-export default props => {
+export const PaymentForm = props => {
   const stripe = useStripe()
   const elements = useElements()
   const navigate = useHistory()
@@ -50,7 +52,7 @@ export default props => {
     
     if (result.error) {
       props.setLoading(false)
-      props.errorHandler(result.error.message)
+      props.displayError(result.error.message)
       return null
     }
     return result
@@ -61,10 +63,9 @@ export default props => {
   the customer has confirmed their card details. If the payment 
   is successful the order is updated in the database and moved
   from the checkout to the next stage of processing*/
-  const handlePayment = async (event, clientName, token, orderId) => {
+  const handlePayment = async (event) => {
     event.preventDefault()
     props.clearError()
-    props.clearNotification()
 
     //Activate a screen overlay to prevent user interaction during processing
     props.setLoading(true)
@@ -74,16 +75,16 @@ export default props => {
       return props.setLoading(false)
     }
     
-    const result = await submitPaymentToStripe(clientName)
+    const result = await submitPaymentToStripe(props.order.clientName)
     
     if (result && result.paymentIntent.status === "succeeded") {
       const body = {
         paymentId: result.paymentIntent.id,
         clientSecret: result.paymentIntent.client_secret,
-        orderId: orderId
+        orderId: props.order._id
       }
       
-      const response = await props.authApi('/checkout/confirm/payment', token, body, 'PUT', props.displayError)
+      const response = await props.authApi('/checkout/confirm/payment', props.token, body, 'PUT', props.displayError)
       
       props.setLoading(false)
       if (response) {
@@ -94,16 +95,16 @@ export default props => {
 
 
   //Delete the order, which will empty the cart
-  const cancelOrder = async (event, orderId, userId, token) => {
+  const cancelOrder = async (event) => {
     event.preventDefault()
     props.clearError()
 
     const body = {
-      userId: userId,
-      orderId: orderId,
+      userId: props.userId,
+      orderId: props.order._id,
     }
     
-    const response = await props.authApi('/checkout/cancel-order', token, body, 'DELETE', props.displayError)
+    const response = await props.authApi('/checkout/cancel-order', props.token, body, 'DELETE', props.displayError)
 
     if (response) {
       props.displayNotification(response.msg)
@@ -113,8 +114,10 @@ export default props => {
   }
 
   const {loading, order} = props
+
   return <form 
-    onSubmit={(event) => handlePayment(event, order.customerName, props.user.token, order._id)} 
+    id='checkout-payment-form'
+    onSubmit={(event) => handlePayment(event)} 
     className={styles.payment}
     aria-label='enter card details'>
     <CardElement options={cardElementOptions} />
@@ -125,8 +128,28 @@ export default props => {
       disabled={loading || !order.postageConfirmed}>
       Confirm Payment
     </button>
-    <button onClick={(event) => cancelOrder(event, order._id, order.customerId, props.user.token)}>
+    <button onClick={(event) => cancelOrder(event)}>
       Cancel Order
     </button>
   </form>
 }
+
+const mapStateToProps = state => {
+  return {
+    userId: state.user.userId,
+    order: state.order.order,
+    token: state.user.token
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    displayError: error => dispatch(displayError(error)),
+    clearError: () => dispatch(clearError()),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(PaymentForm)

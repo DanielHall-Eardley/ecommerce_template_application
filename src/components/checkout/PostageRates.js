@@ -2,6 +2,7 @@ import React from 'react'
 import styles from './PostageRates.module.css'
 
 export default({rates, shipmentId, selectedRates, updatePostageRate}) => {
+  
   /*This function checks if an individual postage rate 
   is selected and returns a boolean that is used to 
   conditionally add or remove a highlight class*/
@@ -18,7 +19,7 @@ export default({rates, shipmentId, selectedRates, updatePostageRate}) => {
 
     return false
   }
-
+  
   const rateArray = rates.map(rate => {
     return (
       <li key={rate.rateId}

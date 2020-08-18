@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from './ProductSummary.module.css'
+import styles from './CheckoutSummary.module.css'
 
 export default ({order}) => {
   return (

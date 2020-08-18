@@ -5,7 +5,7 @@ import styles from './ProductSummary.module.css'
 /*This component renders a shipment list for a business 
 admin user and a product list for a customer user. Only the
 shipment list contains the links to print the postage labels*/
-export default (order, userType) => {
+export default ({order, userType}) => {
   const renderProductOrShipment = order => {
     if (userType === 'admin' && !order.fulfilled) {
       return order.shipments.map(shipment => {

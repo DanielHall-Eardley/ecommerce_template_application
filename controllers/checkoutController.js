@@ -161,7 +161,7 @@ exports.getPostageRates = async (req, res, next) => {
     order.clientPhoneNumber = req.body.phoneNumber
     order.shipments = shipmentArray
     const savedOrder = await order.save()
-    res.status(200).json(savedOrder)
+    res.status(200).json({order: savedOrder})
   } catch (error) {
     next(error)
   }
@@ -175,7 +175,7 @@ exports.confirmPostageRates = async (req, res, next) => {
     const orderId = req.body.orderId
     const userId = req.body.userId
     const selectedRates = req.body.selectedRates
-    
+    console.log(selectedRates)
     const order = await Order.findOne({
       _id: orderId,
       customerId: userId,

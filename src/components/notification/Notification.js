@@ -10,7 +10,7 @@ export default props => {
       behavior: 'smooth'
     })
   }, [props.error, props.notification])
-
+  
   const notificationArray = (arrayOrNull, notificationType) => {
     if (arrayOrNull) {
       return arrayOrNull.map(error => {
@@ -20,9 +20,9 @@ export default props => {
   }
 
   return (
-    <p role='alert' aria-label='notification'>
+    <h3 role='alert' aria-label='notification'>
       {notificationArray(props.error, 'error')}
       {notificationArray(props.notification, 'notification')}
-    </p>
+    </h3>
   )
 }

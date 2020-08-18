@@ -290,7 +290,7 @@ exports.getLabels = async (req, res, next) => {
         shipment.postageLabel = boughtShipment.postage_label.label_url
       }
     }
-    console.log(order)
+    
     const updatedOrder = await order.save()
 
     if (!updatedOrder) {

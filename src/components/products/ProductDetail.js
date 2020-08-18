@@ -19,7 +19,6 @@ const ProductDetail = props => {
   const [selectedImage, setImage] = useState(0)
   const productId = useParams().id
   const navigate = useHistory()
-  props.clearError()
 
   const getProduct = async (productId) => {
     const response = await props.getApi('/product/detail/' + productId)
@@ -59,7 +58,7 @@ const ProductDetail = props => {
 
   /*This function will create an order and add the selected product to it. 
   If a current order already exists it will update it with the selected product */
-  const addToCart = async (event, productId, userId, token) => {
+  const addToCart = async (productId, userId, token) => {
     props.clearError()
     
     const result = props.checkLogin()
@@ -72,7 +71,7 @@ const ProductDetail = props => {
     if (!props.orderId) {
       url = '/order/create'
     }
-
+   
     const body = {
       productId,
       userId: userId,
@@ -202,7 +201,7 @@ const ProductDetail = props => {
         : null}
         {props.userType === 'customer' ?
           <button 
-            onClick={(event) => addToCart(event, _id, props.userId, props.token)}>
+            onClick={() => addToCart(_id, props.userId, props.token)}>
             Add To Cart
           </button>
           : null}

@@ -13,7 +13,7 @@ export default async (url, token, body, method, errorHandler) => {
   })
 
   const response = await res.json();
-
+  
   if (response.error) {
     errorHandler(response.error)
     return null

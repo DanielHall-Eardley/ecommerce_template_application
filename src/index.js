@@ -10,18 +10,10 @@ import store from './store'
 import checkLogin from './helper/checkLogin'
 import getOrderSummary from './helper/getOrderSummary'
 
-import {Elements} from '@stripe/react-stripe-js'
-import {loadStripe} from '@stripe/stripe-js'
-import {stripeApiKey} from './global'
-const stripePromise = loadStripe(stripeApiKey)
-
-
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <Elements stripe={stripePromise}>
-        <App checkLogin={checkLogin} getOrderSummary={getOrderSummary}/>
-      </Elements>
+      <App checkLogin={checkLogin} getOrderSummary={getOrderSummary}/>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

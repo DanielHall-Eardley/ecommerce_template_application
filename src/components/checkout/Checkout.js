@@ -16,7 +16,7 @@ import Loading from './Loading'
 import PostageContainer from './PostageContainer'
 import ProductSummary from './ProductSummary'
 import CheckoutSummary from './CheckoutSummary'
-import PaymentForm from './PaymentForm'
+import StripeWrapper from './StripeWrapper'
 import Address from './Address'
 
 import defaultStyles from './Checkout.module.css'
@@ -94,7 +94,7 @@ export const Checkout = props => {
           <h3 className={styles.header}>Summary</h3>
           <CheckoutSummary order={order}/>
           <h3 className={styles.header}>Complete Payment</h3>
-          <PaymentForm
+          <StripeWrapper
             authApi={props.authApi}
             clientSecret={clientSecret} 
             loading={loading}

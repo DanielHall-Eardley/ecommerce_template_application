@@ -8,7 +8,9 @@ import {
 
 import {useHistory} from 'react-router-dom'
 import {connect} from 'react-redux'
-import {displayError, clearError} from '../../actions/notification'
+import {
+  displayError, clearError
+} from '../../actions/notification'
 
 
 //stripe configuration options

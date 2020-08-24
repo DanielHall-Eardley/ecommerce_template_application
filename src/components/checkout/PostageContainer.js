@@ -21,11 +21,13 @@ export const PostageContainer = props => {
   order in the database or if 'cheapest postage' is selected, the
   order will be adjusted to make the post api automatically select
   the cheapest option for all products*/
-  const confirmPostageRates = async (event, setLowestRate, rates) => {
+  const confirmPostageRates = async (event, setLowestRate) => {
     event.preventDefault()
     props.clearError()
     props.setLoading(true)
     props.setLoadingMsg('Confirming Postage Options')
+
+    let rates = selectedRates
 
     if (setLowestRate) {
       rates = null
@@ -33,7 +35,7 @@ export const PostageContainer = props => {
     
     const body = {
       userId: props.user.userId,
-      orderId: props.orderId,
+      orderId: props.order._id,
       selectedRates: rates
     }
 
@@ -47,36 +49,6 @@ export const PostageContainer = props => {
     props.setLoadingMsg('')
   }
 
-
-  /*This function updates the selected postage rate for an individual
-  product by passing an object containing the shipment id for
-  the product and the id for the currently selected postage rate into local state*/
-  const updatePostageRate = (event, rateId, shipmentId) => {
-    event.preventDefault()
-    
-    /*check to see if a postage rate has alreay been selected*/
-    const shipmentIndex = selectedRates.findIndex(rate => rate.shipmentId === shipmentId)
-
-    const rateObj = {
-      shipmentId,
-      rateId
-    }
-
-    //If no rate has been selected append a new rate object to end of array
-    if (shipmentIndex === -1) {
-      return setRates([...selectedRates, rateObj])
-    }
-
-    //Else replace the current rate object
-    const newArray = [
-      ...selectedRates.slice(0, shipmentIndex),
-      rateObj,
-      ...selectedRates.slice(shipmentIndex + 1) 
-    ]
-   
-    setRates(newArray)
-  }
-
   const {order, loading} = props
   
   if (!order.addressConfirmed && !order.postageConfirmed) {
@@ -87,7 +59,10 @@ export const PostageContainer = props => {
 
   if(order.addressConfirmed && !order.postageConfirmed) {
     return (
-      <form className={styles.selectPostage} aria-live='assertive'>
+      <form 
+        className={styles.selectPostage} 
+        aria-live='assertive' 
+        id="checkout-postage-container">
         <label htmlFor='select-postage-rates'>
           Select postage for each item or choose the cheapest postage for all items
         </label>
@@ -95,16 +70,18 @@ export const PostageContainer = props => {
           <Shipment 
             shipments={order.shipments} 
             selectedRates={selectedRates} 
-            updatePostageRate={updatePostageRate}/>
+            setRates={setRates}/>
         </ul>
         <div className={styles.confirmPostage}>
           <button 
+            id='confirm-postage-rates-selected'
             className={loading ? 'disabled': null} 
             disabled={loading} 
-            onClick={(event) => confirmPostageRates(event, false, selectedRates)}>
+            onClick={(event) => confirmPostageRates(event, false)}>
             Confirm selected postage rates
           </button>
           <button 
+            id='confirm-postage-rates-cheapest'
             className={loading ? 'disabled': null} 
             onClick={(event) => confirmPostageRates(event, true)} 
             disabled={loading}>

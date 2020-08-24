@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './PostageRates.module.css'
 
-export default({rates, shipmentId, selectedRates, updatePostageRate}) => {
+export default({rates, shipmentId, selectedRates, setRates}) => {
   
   /*This function checks if an individual postage rate 
   is selected and returns a boolean that is used to 
@@ -18,6 +18,36 @@ export default({rates, shipmentId, selectedRates, updatePostageRate}) => {
     }
 
     return false
+  }
+
+  
+  /*This function updates the selected postage rate for an individual
+  product by passing an object containing the shipment id for
+  the product and the id for the currently selected postage rate into local state*/
+  const updatePostageRate = (event, rateId, shipmentId) => {
+    event.preventDefault()
+    
+    /*check to see if a postage rate has alreay been selected*/
+    const shipmentIndex = selectedRates.findIndex(rate => rate.shipmentId === shipmentId)
+
+    const rateObj = {
+      shipmentId,
+      rateId
+    }
+
+    //If no rate has been selected append a new rate object to end of array
+    if (shipmentIndex === -1) {
+      return setRates([...selectedRates, rateObj])
+    }
+
+    //Else replace the current rate object
+    const newArray = [
+      ...selectedRates.slice(0, shipmentIndex),
+      rateObj,
+      ...selectedRates.slice(shipmentIndex + 1) 
+    ]
+   
+    setRates(newArray)
   }
   
   const rateArray = rates.map(rate => {

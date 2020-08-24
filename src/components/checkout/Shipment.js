@@ -2,7 +2,7 @@ import React from 'react'
 import styles from './Shipment.module.css'
 import PostageRates from './PostageRates'
 
-export default ({shipments, selectedRates, updatePostageRate}) => {
+export default ({shipments, selectedRates, setRates}) => {
   const shipmentArray = shipments.map(shipment => {
     return (
       <li 
@@ -14,7 +14,7 @@ export default ({shipments, selectedRates, updatePostageRate}) => {
           rates={shipment.rates} 
           shipmentId={shipment.shipmentId}
           selectedRates={selectedRates}
-          updatePostageRate={updatePostageRate}/>
+          setRates={setRates}/>
       </li>
     )
   })

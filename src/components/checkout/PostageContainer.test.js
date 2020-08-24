@@ -24,7 +24,6 @@ beforeEach(() => {
     authApi: jest.fn().mockResolvedValue(apiResponse),
     storeOrder: jest.fn(),
     setSecret: jest.fn(),
-    orderId: 'A unique orderId',
     user: {
       token: 'A unique token',
       userId: 'A unique userId'
@@ -32,6 +31,7 @@ beforeEach(() => {
     setRates: jest.fn(),
     loading: false,
     order: {
+      _id: 'A unique orderId',
       addressConfirmed: true,
       postageConfirmed: false,
     }
@@ -88,7 +88,7 @@ test('test postage confirmation with cheapest postage option and failed api resp
     props.user.token,
     {
       userId: props.user.userId,
-      orderId: props.orderId,
+      orderId: props.order._id,
       selectedRates: null
     },
     'POST',
@@ -115,7 +115,7 @@ test('test postage confirmation with cheapest postage option and successful api 
     props.user.token,
     {
       userId: props.user.userId,
-      orderId: props.orderId,
+      orderId: props.order._id,
       selectedRates: null
     },
     'POST',
@@ -146,7 +146,7 @@ test('test postage confirmation with customer selected postage options and faile
     props.user.token,
     {
       userId: props.user.userId,
-      orderId: props.orderId,
+      orderId: props.order._id,
       selectedRates: []
     },
     'POST',
@@ -173,7 +173,7 @@ test('test postage confirmation with customer selected postage options and succe
     props.user.token,
     {
       userId: props.user.userId,
-      orderId: props.orderId,
+      orderId: props.order._id,
       selectedRates: []
     },
     'POST',

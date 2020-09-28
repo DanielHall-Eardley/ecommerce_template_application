@@ -6,7 +6,7 @@ export default({rates, shipmentId, selectedRates, setRates}) => {
   /*This function checks if an individual postage rate 
   is selected and returns a boolean that is used to 
   conditionally add or remove a highlight class*/
-  const checkIfSelected = (rateId, shipmentId, selectedRates) => {
+  const checkIfSelected = rateId => {
     const shipmentIndex = selectedRates.findIndex(rate => rate.shipmentId === shipmentId)
     
     if (shipmentIndex === -1) {
@@ -24,7 +24,7 @@ export default({rates, shipmentId, selectedRates, setRates}) => {
   /*This function updates the selected postage rate for an individual
   product by passing an object containing the shipment id for
   the product and the id for the currently selected postage rate into local state*/
-  const updatePostageRate = (event, rateId, shipmentId) => {
+  const updatePostageRate = (event, rateId) => {
     event.preventDefault()
     
     /*check to see if a postage rate has alreay been selected*/
@@ -54,13 +54,13 @@ export default({rates, shipmentId, selectedRates, setRates}) => {
     return (
       <li key={rate.rateId}
         className={
-          checkIfSelected(rate.rateId, shipmentId, selectedRates) ?
+          checkIfSelected(rate.rateId) ?
           styles.selected :
           null
         }>
         <button 
           aria-label='select postage rate'
-          onClick={(event) => updatePostageRate(event, rate.rateId, shipmentId)}>
+          onClick={(event) => updatePostageRate(event, rate.rateId)}>
           <span>
             { !rate.guaranteedDeliveryTime ? 
               `Estimated delivery time: ${rate.deliveryTime} days` :
